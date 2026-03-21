@@ -3,7 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { RootStackParamList } from '@/types';
 import { useAuthStore } from '@/store/authStore';
-import { colors, palette } from '@/theme';
+import { colors, typography, spacing } from '@/theme';
 
 import AuthScreen from '@/screens/AuthScreen';
 import HomeScreen from '@/screens/HomeScreen';
@@ -23,10 +23,14 @@ export default function AppNavigator() {
       screenOptions={{
         headerStyle: {
           backgroundColor: colors.surface,
+          elevation: 0,
+          shadowOpacity: 0,
+          borderBottomWidth: 1,
+          borderBottomColor: colors.borderSubtle,
         },
         headerTintColor: colors.textPrimary,
         headerTitleStyle: {
-          fontWeight: '500',
+          ...typography.subheading,
         },
       }}
     >
@@ -76,13 +80,13 @@ export default function AppNavigator() {
 
 const styles = StyleSheet.create({
   signOutButton: {
-    marginRight: 15,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    marginRight: spacing.lg,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
   },
   signOutText: {
-    color: colors.accentActive,
-    fontSize: 14,
+    color: colors.textMuted,
+    ...typography.caption,
     fontWeight: '500',
   },
 });

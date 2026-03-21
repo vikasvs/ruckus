@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '@/store/authStore';
 import { createUser } from '@/services/user';
-import { colors, palette, typography, radii, spacing } from '@/theme';
+import { colors, typography, radii, spacing } from '@/theme';
 
 export default function AuthScreen() {
   const [firstName, setFirstName] = useState('');
@@ -75,46 +75,46 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 20,
+    paddingHorizontal: spacing.pagePadding,
     justifyContent: 'center',
-    alignItems: 'center',
+    maxWidth: 400,
+    width: '100%',
+    alignSelf: 'center',
   },
   title: {
-    fontSize: 36,
-    fontWeight: '500',
+    ...typography.display,
     color: colors.textPrimary,
-    marginBottom: 10,
+    marginBottom: spacing.sm,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 18,
+    ...typography.body,
     color: colors.textMuted,
-    marginBottom: 30,
+    marginBottom: spacing['2xl'],
     textAlign: 'center',
   },
   input: {
     width: '100%',
-    height: 50,
+    height: 48,
     borderWidth: 1,
     borderColor: colors.borderDefault,
     borderRadius: radii.md,
-    paddingHorizontal: 15,
-    fontSize: 16,
-    marginBottom: 20,
+    paddingHorizontal: spacing.lg,
+    ...typography.body,
+    marginBottom: spacing.lg,
     backgroundColor: colors.surface,
     color: colors.textPrimary,
   },
   button: {
     width: '100%',
-    height: 50,
+    height: 48,
     backgroundColor: colors.accentActive,
-    borderRadius: radii.md,
+    borderRadius: radii.sm,
     justifyContent: 'center',
     alignItems: 'center',
   },
   buttonText: {
     color: colors.textInverse,
-    fontSize: 16,
-    fontWeight: '500',
+    ...typography.subheading,
   },
 });

@@ -97,7 +97,7 @@ function ActivityTab() {
   return (
     <View style={styles.activityContainer}>
       <View style={styles.statusSection}>
-        <Text style={styles.statusTitle}>Current Status</Text>
+        <Text style={styles.statusLabel}>CURRENT STATUS</Text>
         {currentStatus ? (
           <Text style={[
             styles.statusText,
@@ -147,7 +147,7 @@ function ActivityTab() {
       )}
 
       <View style={styles.activityFeed}>
-        <Text style={styles.feedTitle}>Recent Activity</Text>
+        <Text style={styles.feedTitle}>RECENT ACTIVITY</Text>
         <FlatList
           data={recentActivity}
           renderItem={({ item }) => <ActivityItem item={item} />}
@@ -223,7 +223,7 @@ function MembersTab() {
     <View style={styles.membersContainer}>
       {currentGroup && (
         <TouchableOpacity style={styles.inviteCodeCard} onPress={handleCopyInviteCode}>
-          <Text style={styles.inviteCodeLabel}>Invite Code</Text>
+          <Text style={styles.inviteCodeLabel}>INVITE CODE</Text>
           <Text style={styles.inviteCode}>{currentGroup.invite_code}</Text>
           <Text style={styles.tapToCopy}>Tap to copy</Text>
         </TouchableOpacity>
@@ -240,7 +240,7 @@ function MembersTab() {
       </View>
 
       <Text style={styles.membersTitle}>
-        Members ({currentGroupMembers.length})
+        MEMBERS ({currentGroupMembers.length})
       </Text>
 
       <FlatList
@@ -303,9 +303,13 @@ export default function GroupScreen() {
           tabBarStyle: {
             backgroundColor: colors.surface,
             borderTopColor: colors.borderSubtle,
+            borderTopWidth: 1,
           },
           tabBarActiveTintColor: colors.accentActive,
           tabBarInactiveTintColor: colors.textMuted,
+          tabBarLabelStyle: {
+            ...typography.label,
+          },
           headerShown: false,
         }}
       >
@@ -339,101 +343,102 @@ const styles = StyleSheet.create({
   activityContainer: {
     flex: 1,
     backgroundColor: colors.pageBg,
-    padding: 20,
+    padding: spacing.pagePadding,
   },
   statusSection: {
     alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: spacing.xl,
   },
-  statusTitle: {
-    fontSize: 18,
-    color: colors.textPrimary,
-    marginBottom: 10,
+  statusLabel: {
+    ...typography.label,
+    color: colors.textMuted,
+    marginBottom: spacing.sm,
   },
   statusText: {
-    fontSize: 16,
+    ...typography.body,
     color: colors.textMuted,
   },
   ruckedText: {
     color: colors.ruckedFill,
+    fontWeight: '600',
   },
   rickedText: {
     color: colors.rickedFill,
+    fontWeight: '600',
   },
   buttonSection: {
     flexDirection: 'row',
-    gap: 15,
-    marginBottom: 30,
+    gap: spacing.md,
+    marginBottom: spacing.xl,
   },
   activityFeed: {
     flex: 1,
   },
   feedTitle: {
-    fontSize: 18,
-    color: colors.textPrimary,
-    marginBottom: 15,
-    fontWeight: '500',
+    ...typography.label,
+    color: colors.textMuted,
+    marginBottom: spacing.md,
   },
   emptyText: {
     color: colors.textMuted,
     textAlign: 'center',
-    fontSize: 16,
-    marginTop: 20,
+    ...typography.body,
+    marginTop: spacing.xl,
   },
   progressContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
-    gap: 10,
+    marginBottom: spacing.xl,
+    gap: spacing.sm,
   },
   progressTrack: {
     flex: 1,
-    height: 6,
+    height: 4,
     backgroundColor: colors.cooldownTrack,
-    borderRadius: 3,
+    borderRadius: 2,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    borderRadius: 3,
+    borderRadius: 2,
   },
   progressTime: {
     color: colors.textPrimary,
-    fontSize: 14,
-    fontWeight: '500',
-    width: 35,
+    ...typography.caption,
+    fontWeight: '600',
+    width: 36,
     textAlign: 'right',
   },
   membersContainer: {
     flex: 1,
     backgroundColor: colors.pageBg,
-    padding: 20,
+    padding: spacing.pagePadding,
   },
   inviteCodeCard: {
     backgroundColor: colors.surface,
     borderRadius: radii.md,
-    padding: 16,
+    padding: spacing.cardPadding,
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: spacing.lg,
     borderWidth: 1,
     borderColor: colors.borderDefault,
   },
   inviteCodeLabel: {
-    fontSize: 12,
+    ...typography.label,
     color: colors.textMuted,
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   inviteCode: {
     fontSize: 24,
-    fontWeight: '500',
+    fontWeight: '600',
     color: colors.textPrimary,
-    letterSpacing: 2,
-    fontFamily: 'monospace',
+    letterSpacing: 3,
+    fontFamily: typography.monoFamily,
   },
   tapToCopy: {
-    fontSize: 11,
+    ...typography.small,
     color: colors.textLabel,
-    marginTop: 4,
+    marginTop: spacing.xs,
   },
   notificationToggle: {
     flexDirection: 'row',
@@ -441,19 +446,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.surface,
     borderRadius: radii.md,
-    padding: 16,
-    marginBottom: 20,
+    padding: spacing.cardPadding,
+    marginBottom: spacing.lg,
     borderWidth: 1,
     borderColor: colors.borderDefault,
   },
   notificationLabel: {
-    fontSize: 16,
+    ...typography.body,
     color: colors.textPrimary,
   },
   membersTitle: {
-    fontSize: 18,
-    color: colors.textPrimary,
-    marginBottom: 15,
-    fontWeight: '500',
+    ...typography.label,
+    color: colors.textMuted,
+    marginBottom: spacing.md,
   },
 });

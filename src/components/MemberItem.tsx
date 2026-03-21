@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { GroupMemberWithUser } from '@/types';
-import { colors, palette, spacing, getStatusColor } from '@/theme';
+import { colors, palette, spacing, radii, typography, getStatusColor } from '@/theme';
 
 interface MemberItemProps {
   member: GroupMemberWithUser;
@@ -40,7 +40,7 @@ export default function MemberItem({ member, isCurrentUser }: MemberItemProps) {
             {isCurrentUser && <Text style={styles.youTag}> (you)</Text>}
           </Text>
           {member.is_admin && (
-            <Text style={styles.adminBadge}>Admin</Text>
+            <Text style={styles.adminBadge}>ADMIN</Text>
           )}
         </View>
       </View>
@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 14,
+    paddingVertical: spacing.listItemPaddingY,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderSubtle,
   },
@@ -74,27 +74,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statusDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 12,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: spacing.md,
   },
   name: {
-    fontSize: 16,
+    ...typography.body,
     color: colors.textPrimary,
     fontWeight: '500',
   },
   youTag: {
     color: colors.textMuted,
-    fontWeight: 'normal',
+    fontWeight: '400',
   },
   adminBadge: {
-    fontSize: 11,
+    ...typography.label,
     color: palette.feedback.success.text,
     backgroundColor: palette.feedback.success.bg,
     paddingHorizontal: 6,
     paddingVertical: 1,
-    borderRadius: 4,
+    borderRadius: radii.sm,
     overflow: 'hidden',
     marginTop: 2,
   },
@@ -102,12 +102,12 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   statusText: {
-    fontSize: 14,
+    ...typography.caption,
     fontWeight: '600',
     marginBottom: 2,
   },
   lastActivity: {
-    fontSize: 12,
+    ...typography.small,
     color: colors.textMuted,
   },
 });
