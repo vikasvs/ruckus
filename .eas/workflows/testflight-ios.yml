@@ -14,11 +14,10 @@ jobs:
       profile: production
       message: "${{ github.commit_message || 'Automated TestFlight build' }}"
 
-  distribute_testflight:
-    name: Distribute to TestFlight
-    type: testflight
+  submit_ios:
+    name: Submit to TestFlight
+    type: submit
     needs: [build_ios]
     params:
       build_id: ${{ needs.build_ios.outputs.build_id }}
       profile: production
-      changelog: "${{ github.commit_message || 'Automated TestFlight build' }}"
