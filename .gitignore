@@ -1,0 +1,48 @@
+# OSX
+.DS_Store
+
+# Expo
+.expo/
+dist/
+web-build/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# Node
+node_modules/
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Env files
+.env
+.env.*
+!.env.example
+
+# Temporary files
+*.log
+*.tmp
+tmp/
+temp/
+
+# Build
+build/
+*.tsbuildinfo
+
+# Testing
+coverage/
+
+# Supabase
+supabase/.branches/
+supabase/.temp/
+
