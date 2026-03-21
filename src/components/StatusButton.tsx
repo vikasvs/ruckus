@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
-import { colors, palette, radii } from '@/theme';
+import { colors, radii, typography } from '@/theme';
 
 interface StatusButtonProps {
   type: 'rucked' | 'ricked';
@@ -28,7 +28,7 @@ export default function StatusButton({
       style={[
         styles.button,
         type === 'rucked' ? styles.ruckedButton : styles.rickedButton,
-        isActive && styles.activeButton,
+        isActive && (type === 'rucked' ? styles.ruckedActive : styles.rickedActive),
         isDisabled && styles.disabledButton,
       ]}
       onPress={onPress}
@@ -50,7 +50,7 @@ export default function StatusButton({
 const styles = StyleSheet.create({
   button: {
     flex: 1,
-    height: 100,
+    height: 88,
     borderRadius: radii.md,
     justifyContent: 'center',
     alignItems: 'center',
@@ -63,25 +63,29 @@ const styles = StyleSheet.create({
   rickedButton: {
     backgroundColor: colors.rickedFill,
   },
-  activeButton: {
+  ruckedActive: {
     borderWidth: 3,
-    borderColor: colors.borderActive,
+    borderColor: colors.textPrimary,
+  },
+  rickedActive: {
+    borderWidth: 3,
+    borderColor: colors.textPrimary,
   },
   disabledButton: {
-    opacity: 0.5,
+    opacity: 0.4,
   },
   buttonText: {
     color: colors.textInverse,
-    fontSize: 18,
-    fontWeight: '500',
+    ...typography.subheading,
+    fontWeight: '600',
   },
   cooldownOverlay: {
     position: 'absolute',
-    bottom: 10,
+    bottom: 8,
   },
   cooldownText: {
     color: colors.textInverse,
-    fontSize: 14,
-    fontWeight: '500',
+    ...typography.caption,
+    fontWeight: '600',
   },
 });

@@ -15,7 +15,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@/types';
 import { useAuthStore } from '@/store/authStore';
 import { useGroupsStore } from '@/store/groupsStore';
-import { colors, palette, radii, spacing, typography } from '@/theme';
+import { colors, radii, spacing, typography } from '@/theme';
 
 type CreateGroupScreenNavigationProp = StackNavigationProp<RootStackParamList, 'CreateGroup'>;
 
@@ -89,7 +89,7 @@ export default function CreateGroupScreen() {
         />
 
         <Text style={styles.characterCount}>
-          {groupName.length}/100 characters
+          {groupName.length}/100
         </Text>
 
         <TouchableOpacity
@@ -115,51 +115,52 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 20,
+    paddingHorizontal: spacing.pagePadding,
     justifyContent: 'center',
+    maxWidth: 400,
+    width: '100%',
+    alignSelf: 'center',
   },
   title: {
-    fontSize: 28,
-    fontWeight: '500',
+    ...typography.heading,
     color: colors.textPrimary,
     textAlign: 'center',
-    marginBottom: 10,
+    marginBottom: spacing.sm,
   },
   subtitle: {
-    fontSize: 16,
+    ...typography.body,
     color: colors.textMuted,
     textAlign: 'center',
-    marginBottom: 40,
-    lineHeight: 24,
+    marginBottom: spacing['2xl'],
+    lineHeight: 22,
   },
   input: {
     backgroundColor: colors.surface,
     color: colors.textPrimary,
-    fontSize: 16,
-    padding: 15,
+    ...typography.body,
+    padding: spacing.md,
     borderRadius: radii.md,
-    marginBottom: 10,
+    marginBottom: spacing.sm,
     borderWidth: 1,
     borderColor: colors.borderDefault,
   },
   characterCount: {
     color: colors.textLabel,
-    fontSize: 12,
+    ...typography.small,
     textAlign: 'right',
-    marginBottom: 30,
+    marginBottom: spacing.xl,
   },
   button: {
     backgroundColor: colors.accentActive,
-    padding: 15,
+    paddingVertical: spacing.md,
     borderRadius: radii.sm,
     alignItems: 'center',
   },
   buttonDisabled: {
-    opacity: 0.6,
+    opacity: 0.5,
   },
   buttonText: {
     color: colors.textInverse,
-    fontSize: 16,
-    fontWeight: '500',
+    ...typography.subheading,
   },
 });

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { StatusEventWithUser } from '@/types';
-import { colors, palette, spacing, getStatusColor } from '@/theme';
+import { colors, spacing, typography, getStatusColor } from '@/theme';
 
 interface ActivityItemProps {
   item: StatusEventWithUser;
@@ -60,16 +60,16 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.borderSubtle,
   },
   statusDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginRight: 12,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: spacing.md,
   },
   content: {
     flex: 1,
   },
   text: {
-    fontSize: 15,
+    ...typography.body,
     color: colors.textPrimary,
     marginBottom: 2,
   },
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   time: {
-    fontSize: 12,
+    ...typography.small,
     color: colors.textMuted,
   },
 });

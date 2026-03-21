@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { GroupWithMembership } from '@/types';
-import { colors, palette, radii, spacing, shadows } from '@/theme';
+import { colors, palette, radii, spacing, typography } from '@/theme';
 
 interface GroupCardProps {
   group: GroupWithMembership;
@@ -63,55 +63,53 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: radii.md,
     padding: spacing.cardPadding,
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
     borderWidth: 1,
     borderColor: colors.borderDefault,
     borderLeftWidth: 4,
     borderLeftColor: colors.accentActive,
-    ...shadows.card,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   name: {
-    fontSize: 18,
-    fontWeight: '500',
+    ...typography.subheading,
     color: colors.textPrimary,
     flex: 1,
   },
   shareButton: {
     backgroundColor: colors.surfaceHover,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
     borderRadius: radii.sm,
-    marginLeft: 8,
+    marginLeft: spacing.sm,
   },
   shareIcon: {
-    color: colors.textSecondary,
-    fontSize: 14,
+    color: colors.textMuted,
+    ...typography.caption,
   },
   activeDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
     backgroundColor: palette.feedback.success.base,
-    marginLeft: 8,
+    marginLeft: spacing.sm,
   },
   memberCount: {
-    fontSize: 14,
+    ...typography.caption,
     color: colors.textMuted,
-    marginBottom: 10,
+    marginBottom: spacing.sm,
   },
   statusContainer: {
     flexDirection: 'row',
-    gap: 8,
+    gap: spacing.sm,
   },
   statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: radii.pill,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 3,
+    borderRadius: radii.sm,
   },
   ruckedBadge: {
     backgroundColor: colors.ruckedBg,
@@ -120,8 +118,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.rickedBg,
   },
   statusText: {
-    fontSize: 12,
-    fontWeight: '500',
+    ...typography.label,
   },
   ruckedText: {
     color: colors.ruckedText,

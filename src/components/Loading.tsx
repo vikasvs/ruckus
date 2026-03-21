@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
-import { colors } from '@/theme';
+import { colors, spacing, typography } from '@/theme';
 
 interface LoadingProps {
   message?: string;
@@ -29,8 +29,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.pageBg,
   },
   message: {
-    marginTop: 16,
-    fontSize: 16,
+    marginTop: spacing.lg,
+    ...typography.body,
     color: colors.textMuted,
   },
 });

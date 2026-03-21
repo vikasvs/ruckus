@@ -13,7 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList, GroupWithMembership } from '@/types';
-import { colors, palette, radii, spacing } from '@/theme';
+import { colors, radii, spacing, typography } from '@/theme';
 import { useAuthStore } from '@/store/authStore';
 import { useGroupsStore } from '@/store/groupsStore';
 import GroupCard from '@/components/GroupCard';
@@ -136,14 +136,14 @@ const styles = StyleSheet.create({
   createButton: {
     flex: 1,
     backgroundColor: colors.accentActive,
-    padding: spacing.lg,
+    paddingVertical: spacing.md,
     borderRadius: radii.sm,
     alignItems: 'center',
   },
   joinButton: {
     flex: 1,
     backgroundColor: colors.surface,
-    padding: spacing.lg,
+    paddingVertical: spacing.md,
     borderRadius: radii.sm,
     alignItems: 'center',
     borderWidth: 1,
@@ -151,12 +151,10 @@ const styles = StyleSheet.create({
   },
   fabText: {
     color: colors.textInverse,
-    fontSize: 16,
-    fontWeight: '500',
+    ...typography.subheading,
   },
   joinButtonText: {
     color: colors.textPrimary,
-    fontSize: 16,
-    fontWeight: '500',
+    ...typography.subheading,
   },
 });
