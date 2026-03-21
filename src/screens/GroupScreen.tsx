@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState, useRef } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -14,20 +14,14 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useRoute, useNavigation, RouteProp, useFocusEffect } from '@react-navigation/native';
-import { RealtimeChannel } from '@supabase/supabase-js';
 import { RootStackParamList, TabParamList, GroupMemberWithUser } from '@/types';
 import { useAuthStore } from '@/store/authStore';
 import { useGroupsStore } from '@/store/groupsStore';
 import { useStatusStore } from '@/store/statusStore';
-import { getSupabase } from '@/services/supabase';
+import { updateMemberNotifications } from '@/services/groups';
 import StatusButton from '@/components/StatusButton';
 import ActivityItem from '@/components/ActivityItem';
 import MemberItem from '@/components/MemberItem';
-import {
-  subscribeToGroupStatus,
-  subscribeToGroupActivity,
-  unsubscribe,
-} from '@/utils/realtime';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -37,7 +31,7 @@ function ActivityTab() {
   const route = useRoute<GroupScreenRouteProp>();
   const { groupId } = route.params;
   const { user } = useAuthStore();
-  const { currentGroupMembers } = useGroupsStore();
+  const { currentGroupMembers, fetchMembers } = useGroupsStore();
   const {
     currentStatus,
     cooldownRemaining,
@@ -52,7 +46,6 @@ function ActivityTab() {
 
   useEffect(() => {
     if (user?.id && groupId) {
-      // Find current user's status from members
       const currentMember = currentGroupMembers.find(m => m.user_id === user.id);
       if (currentMember?.current_status) {
         setCurrentStatus(currentMember.current_status);
@@ -63,10 +56,20 @@ function ActivityTab() {
     }
   }, [user?.id, groupId, currentGroupMembers]);
 
+  // Poll for updates every 10 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchRecentActivity(groupId);
+      fetchMembers(groupId);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [groupId]);
+
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
       await fetchRecentActivity(groupId);
+      await fetchMembers(groupId);
     } finally {
       setRefreshing(false);
     }
@@ -173,7 +176,6 @@ function MembersTab() {
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    // Find current user's notification setting
     const currentMember = currentGroupMembers.find(m => m.user_id === user?.id);
     if (currentMember) {
       setNotificationsEnabled(currentMember.notifications_enabled);
@@ -202,14 +204,7 @@ function MembersTab() {
     setNotificationsEnabled(value);
 
     try {
-      const supabase = getSupabase();
-      const { error } = await supabase
-        .from('group_members')
-        .update({ notifications_enabled: value })
-        .eq('group_id', groupId)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
+      await updateMemberNotifications(groupId, user.id, value);
     } catch (error: any) {
       setNotificationsEnabled(!value);
       Alert.alert('Error', 'Failed to update notification settings');
@@ -270,33 +265,15 @@ export default function GroupScreen() {
   const route = useRoute<GroupScreenRouteProp>();
   const navigation = useNavigation();
   const { groupId } = route.params;
-  const { fetchGroupDetails, fetchMembers, currentGroup, isLoading, updateMemberStatus } = useGroupsStore();
-  const { reset: resetStatus, addActivityItem } = useStatusStore();
-  const statusChannelRef = useRef<RealtimeChannel | null>(null);
-  const activityChannelRef = useRef<RealtimeChannel | null>(null);
+  const { fetchGroupDetails, fetchMembers, currentGroup, isLoading } = useGroupsStore();
+  const { reset: resetStatus } = useStatusStore();
 
   useFocusEffect(
     useCallback(() => {
       fetchGroupDetails(groupId);
       fetchMembers(groupId);
 
-      // Set up real-time subscriptions
-      statusChannelRef.current = subscribeToGroupStatus(groupId, (payload) => {
-        updateMemberStatus(payload.userId, payload.status);
-      });
-
-      activityChannelRef.current = subscribeToGroupActivity(groupId, (payload) => {
-        addActivityItem(payload);
-      });
-
       return () => {
-        // Clean up subscriptions
-        if (statusChannelRef.current) {
-          unsubscribe(statusChannelRef.current);
-        }
-        if (activityChannelRef.current) {
-          unsubscribe(activityChannelRef.current);
-        }
         resetStatus();
       };
     }, [groupId])

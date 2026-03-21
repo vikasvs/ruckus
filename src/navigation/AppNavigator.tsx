@@ -5,7 +5,6 @@ import { RootStackParamList } from '@/types';
 import { useAuthStore } from '@/store/authStore';
 
 import AuthScreen from '@/screens/AuthScreen';
-import NameScreen from '@/screens/NameScreen';
 import HomeScreen from '@/screens/HomeScreen';
 import GroupScreen from '@/screens/GroupScreen';
 import CreateGroupScreen from '@/screens/CreateGroupScreen';
@@ -15,6 +14,8 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
   const { session, signOut, needsName } = useAuthStore();
+
+  const isAuthenticated = session && !needsName;
 
   return (
     <Stack.Navigator
@@ -28,16 +29,10 @@ export default function AppNavigator() {
         },
       }}
     >
-      {!session ? (
+      {!isAuthenticated ? (
         <Stack.Screen
           name="Auth"
           component={AuthScreen}
-          options={{ headerShown: false }}
-        />
-      ) : needsName ? (
-        <Stack.Screen
-          name="Name"
-          component={NameScreen}
           options={{ headerShown: false }}
         />
       ) : (

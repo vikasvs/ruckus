@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
@@ -12,11 +12,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RealtimeChannel } from '@supabase/supabase-js';
 import { RootStackParamList, GroupWithMembership } from '@/types';
 import { useAuthStore } from '@/store/authStore';
 import { useGroupsStore } from '@/store/groupsStore';
-import { subscribeToUserGroups, unsubscribe } from '@/utils/realtime';
 import GroupCard from '@/components/GroupCard';
 import Loading from '@/components/Loading';
 import EmptyState from '@/components/EmptyState';
@@ -27,7 +25,6 @@ export default function HomeScreen() {
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const { user } = useAuthStore();
   const { groups, isLoading, fetchGroups } = useGroupsStore();
-  const subscriptionRef = useRef<RealtimeChannel | null>(null);
 
   const loadGroups = useCallback(async () => {
     if (user?.id) {
@@ -42,21 +39,7 @@ export default function HomeScreen() {
   useFocusEffect(
     useCallback(() => {
       loadGroups();
-
-      // Set up real-time subscription for status changes
-      if (user?.id) {
-        subscriptionRef.current = subscribeToUserGroups(user.id, () => {
-          // Refresh groups when any status changes
-          loadGroups();
-        });
-      }
-
-      return () => {
-        if (subscriptionRef.current) {
-          unsubscribe(subscriptionRef.current);
-        }
-      };
-    }, [loadGroups, user?.id])
+    }, [loadGroups])
   );
 
   const handleGroupPress = (group: GroupWithMembership) => {

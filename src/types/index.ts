@@ -51,7 +51,6 @@ export interface NotificationLog {
 
 export type RootStackParamList = {
   Auth: undefined;
-  Name: undefined;
   Home: undefined;
   Group: { groupId: string };
   CreateGroup: undefined;
