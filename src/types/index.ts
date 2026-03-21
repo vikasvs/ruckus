@@ -52,7 +52,7 @@ export interface NotificationLog {
 export type RootStackParamList = {
   Auth: undefined;
   Home: undefined;
-  Group: { groupId: string };
+  Group: { groupId: string; showInviteCode?: boolean };
   CreateGroup: undefined;
   JoinGroup: undefined;
 };

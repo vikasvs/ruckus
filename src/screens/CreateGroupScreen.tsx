@@ -7,7 +7,6 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
-  Clipboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -45,24 +44,7 @@ export default function CreateGroupScreen() {
     try {
       setIsSubmitting(true);
       const group = await createGroup(groupName.trim(), user.id);
-
-      Alert.alert(
-        'Group Created!',
-        `Your invite code is: ${group.invite_code}\n\nShare this code with your friends to let them join.`,
-        [
-          {
-            text: 'Copy Code',
-            onPress: () => {
-              Clipboard.setString(group.invite_code);
-              navigation.replace('Group', { groupId: group.id });
-            },
-          },
-          {
-            text: 'OK',
-            onPress: () => navigation.replace('Group', { groupId: group.id }),
-          },
-        ]
-      );
+      navigation.replace('Group', { groupId: group.id, showInviteCode: true });
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Failed to create group');
     } finally {
