@@ -30,14 +30,14 @@ export const palette = {
 
   status: {
     rucked: {
-      base: '#FF4458',
-      bg: '#FFE8EA',
-      text: '#9B1B2B',
+      base: '#27272A',      // Parallel charcoal
+      bg: '#F4F4F5',
+      text: '#27272A',
     },
     ricked: {
-      base: '#9C27B0',
-      bg: '#F3E5F5',
-      text: '#6A1B7B',
+      base: '#3B82F6',      // Parallel blue
+      bg: '#DBEAFE',
+      text: '#1E40AF',
     },
     idle: {
       base: '#A1A1AA',

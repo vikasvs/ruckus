@@ -11,7 +11,6 @@ import {
   ActivityIndicator,
   RefreshControl,
   Share,
-  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -264,17 +263,8 @@ function MembersTab() {
   );
 }
 
-function InviteCodeBanner({ inviteCode, groupName }: { inviteCode: string; groupName: string }) {
+function InviteCodeBar({ inviteCode, groupName }: { inviteCode: string; groupName: string }) {
   const [copied, setCopied] = useState(false);
-  const fadeAnim = React.useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  }, []);
 
   const handleCopy = () => {
     Clipboard.setString(inviteCode);
@@ -285,29 +275,21 @@ function InviteCodeBanner({ inviteCode, groupName }: { inviteCode: string; group
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `Join my group "${groupName}" on Ruckus! Use invite code: ${inviteCode}`,
+        message: `Join "${groupName}" on Ruckus! Code: ${inviteCode}`,
       });
-    } catch (_) {
-      // User cancelled
-    }
+    } catch (_) {}
   };
 
   return (
-    <Animated.View style={[styles.inviteBanner, { opacity: fadeAnim }]}>
-      <Text style={styles.inviteBannerTitle}>Group created!</Text>
-      <Text style={styles.inviteBannerSubtitle}>Share this code with your crew</Text>
-      <View style={styles.inviteCodeRow}>
-        <Text style={styles.inviteBannerCode}>{inviteCode}</Text>
-      </View>
-      <View style={styles.inviteBannerActions}>
-        <TouchableOpacity style={styles.copyButton} onPress={handleCopy}>
-          <Text style={styles.copyButtonText}>{copied ? 'Copied!' : 'Copy Code'}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
-          <Text style={styles.shareButtonText}>Share</Text>
-        </TouchableOpacity>
-      </View>
-    </Animated.View>
+    <View style={styles.inviteBar}>
+      <TouchableOpacity style={styles.inviteBarContent} onPress={handleCopy}>
+        <Text style={styles.inviteBarCode}>{inviteCode}</Text>
+        <Text style={styles.inviteBarAction}>{copied ? 'Copied!' : 'Copy'}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={handleShare}>
+        <Text style={styles.inviteBarShare}>Share</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
@@ -349,7 +331,7 @@ export default function GroupScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
       {showBanner && currentGroup && (
-        <InviteCodeBanner
+        <InviteCodeBar
           inviteCode={currentGroup.invite_code}
           groupName={currentGroup.name}
         />
@@ -373,13 +355,23 @@ export default function GroupScreen() {
           name="Activity"
           component={ActivityTab}
           initialParams={{ groupId }}
-          options={{ title: 'Activity' }}
+          options={{
+            title: 'Activity',
+            tabBarIcon: ({ color }) => (
+              <Text style={{ fontSize: 18, color }}>{'\u26A1'}</Text>
+            ),
+          }}
         />
         <Tab.Screen
           name="Members"
           component={MembersTab}
           initialParams={{ groupId }}
-          options={{ title: 'Members' }}
+          options={{
+            title: 'Members',
+            tabBarIcon: ({ color }) => (
+              <Text style={{ fontSize: 18, color }}>{'\u{1F465}'}</Text>
+            ),
+          }}
         />
       </Tab.Navigator>
     </SafeAreaView>
@@ -516,67 +508,37 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     marginBottom: spacing.md,
   },
-  inviteBanner: {
-    backgroundColor: colors.surface,
-    paddingVertical: spacing.lg,
+  inviteBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
     paddingHorizontal: spacing.pagePadding,
+    backgroundColor: colors.surfaceMuted,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderSubtle,
-    alignItems: 'center',
   },
-  inviteBannerTitle: {
-    ...typography.subheading,
-    color: colors.textPrimary,
-    marginBottom: spacing.xs,
-  },
-  inviteBannerSubtitle: {
-    ...typography.caption,
-    color: colors.textMuted,
-    marginBottom: spacing.md,
-  },
-  inviteCodeRow: {
-    backgroundColor: colors.pageBg,
-    borderRadius: radii.md,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.xl,
-    marginBottom: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.borderDefault,
-  },
-  inviteBannerCode: {
-    fontSize: 28,
-    fontWeight: '600',
-    color: colors.textPrimary,
-    letterSpacing: 4,
-    fontFamily: typography.monoFamily,
-    textAlign: 'center',
-  },
-  inviteBannerActions: {
+  inviteBarContent: {
+    flex: 1,
     flexDirection: 'row',
+    alignItems: 'center',
     gap: spacing.sm,
   },
-  copyButton: {
-    backgroundColor: colors.accentActive,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.xl,
-    borderRadius: radii.sm,
+  inviteBarCode: {
+    ...typography.caption,
+    fontFamily: typography.monoFamily,
+    color: colors.textSecondary,
+    letterSpacing: 1.5,
+    fontWeight: '500',
   },
-  copyButtonText: {
-    ...typography.body,
-    color: colors.textInverse,
+  inviteBarAction: {
+    ...typography.caption,
+    color: colors.accentActive,
     fontWeight: '600',
   },
-  shareButton: {
-    backgroundColor: colors.pageBg,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.xl,
-    borderRadius: radii.sm,
-    borderWidth: 1,
-    borderColor: colors.borderDefault,
-  },
-  shareButtonText: {
-    ...typography.body,
-    color: colors.textPrimary,
+  inviteBarShare: {
+    ...typography.caption,
+    color: colors.accentActive,
     fontWeight: '600',
+    paddingLeft: spacing.md,
   },
 });
