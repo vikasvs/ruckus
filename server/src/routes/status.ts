@@ -1,6 +1,9 @@
 import { Router, Request, Response } from 'express';
 import pool from '../db';
 import { v4 as uuidv4 } from 'uuid';
+import { Expo, ExpoPushMessage } from 'expo-server-sdk';
+
+const expo = new Expo();
 
 const router = Router();
 
@@ -40,6 +43,12 @@ router.post('/', async (req: Request, res: Response) => {
     );
 
     await client.query('COMMIT');
+
+    // Send push notifications to other group members (fire-and-forget)
+    sendStatusPush(userId, groupId, statusType).catch(err =>
+      console.error('Push notification error:', err.message)
+    );
+
     res.status(201).json(eventResult.rows[0]);
   } catch (err: any) {
     await client.query('ROLLBACK');
@@ -122,5 +131,45 @@ router.get('/cooldown/:userId/:groupId', async (req: Request, res: Response) => 
     res.status(500).json({ error: err.message });
   }
 });
+
+async function sendStatusPush(userId: string, groupId: string, statusType: string) {
+  // Get the user's name and group name
+  const infoResult = await pool.query(
+    `SELECT u.first_name, g.name as group_name
+     FROM users u, groups g
+     WHERE u.id = $1 AND g.id = $2`,
+    [userId, groupId]
+  );
+  if (infoResult.rows.length === 0) return;
+  const { first_name, group_name } = infoResult.rows[0];
+
+  // Get push tokens of all OTHER members in the group
+  const tokensResult = await pool.query(
+    `SELECT u.push_token FROM group_members gm
+     JOIN users u ON gm.user_id = u.id
+     WHERE gm.group_id = $1 AND gm.user_id != $2 AND u.push_token IS NOT NULL`,
+    [groupId, userId]
+  );
+
+  const messages: ExpoPushMessage[] = [];
+  for (const row of tokensResult.rows) {
+    if (!Expo.isExpoPushToken(row.push_token)) continue;
+    messages.push({
+      to: row.push_token,
+      sound: 'default',
+      title: group_name,
+      body: `${first_name} is ${statusType} up!`,
+      data: { groupId },
+      channelId: statusType,
+    });
+  }
+
+  if (messages.length === 0) return;
+
+  const chunks = expo.chunkPushNotifications(messages);
+  for (const chunk of chunks) {
+    await expo.sendPushNotificationsAsync(chunk);
+  }
+}
 
 export default router;
