@@ -10,6 +10,8 @@ import {
   Clipboard,
   ActivityIndicator,
   RefreshControl,
+  Share,
+  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -262,12 +264,60 @@ function MembersTab() {
   );
 }
 
+function InviteCodeBanner({ inviteCode, groupName }: { inviteCode: string; groupName: string }) {
+  const [copied, setCopied] = useState(false);
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
+  const handleCopy = () => {
+    Clipboard.setString(inviteCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        message: `Join my group "${groupName}" on Ruckus! Use invite code: ${inviteCode}`,
+      });
+    } catch (_) {
+      // User cancelled
+    }
+  };
+
+  return (
+    <Animated.View style={[styles.inviteBanner, { opacity: fadeAnim }]}>
+      <Text style={styles.inviteBannerTitle}>Group created!</Text>
+      <Text style={styles.inviteBannerSubtitle}>Share this code with your crew</Text>
+      <View style={styles.inviteCodeRow}>
+        <Text style={styles.inviteBannerCode}>{inviteCode}</Text>
+      </View>
+      <View style={styles.inviteBannerActions}>
+        <TouchableOpacity style={styles.copyButton} onPress={handleCopy}>
+          <Text style={styles.copyButtonText}>{copied ? 'Copied!' : 'Copy Code'}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
+          <Text style={styles.shareButtonText}>Share</Text>
+        </TouchableOpacity>
+      </View>
+    </Animated.View>
+  );
+}
+
 export default function GroupScreen() {
   const route = useRoute<GroupScreenRouteProp>();
   const navigation = useNavigation();
-  const { groupId } = route.params;
+  const { groupId, showInviteCode } = route.params;
   const { fetchGroupDetails, fetchMembers, currentGroup, isLoading } = useGroupsStore();
   const { reset: resetStatus } = useStatusStore();
+  const [showBanner, setShowBanner] = useState(!!showInviteCode);
 
   useFocusEffect(
     useCallback(() => {
@@ -298,6 +348,12 @@ export default function GroupScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
+      {showBanner && currentGroup && (
+        <InviteCodeBanner
+          inviteCode={currentGroup.invite_code}
+          groupName={currentGroup.name}
+        />
+      )}
       <Tab.Navigator
         screenOptions={{
           tabBarStyle: {
@@ -459,5 +515,68 @@ const styles = StyleSheet.create({
     ...typography.label,
     color: colors.textMuted,
     marginBottom: spacing.md,
+  },
+  inviteBanner: {
+    backgroundColor: colors.surface,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.pagePadding,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderSubtle,
+    alignItems: 'center',
+  },
+  inviteBannerTitle: {
+    ...typography.subheading,
+    color: colors.textPrimary,
+    marginBottom: spacing.xs,
+  },
+  inviteBannerSubtitle: {
+    ...typography.caption,
+    color: colors.textMuted,
+    marginBottom: spacing.md,
+  },
+  inviteCodeRow: {
+    backgroundColor: colors.pageBg,
+    borderRadius: radii.md,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xl,
+    marginBottom: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.borderDefault,
+  },
+  inviteBannerCode: {
+    fontSize: 28,
+    fontWeight: '600',
+    color: colors.textPrimary,
+    letterSpacing: 4,
+    fontFamily: typography.monoFamily,
+    textAlign: 'center',
+  },
+  inviteBannerActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  copyButton: {
+    backgroundColor: colors.accentActive,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.xl,
+    borderRadius: radii.sm,
+  },
+  copyButtonText: {
+    ...typography.body,
+    color: colors.textInverse,
+    fontWeight: '600',
+  },
+  shareButton: {
+    backgroundColor: colors.pageBg,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.xl,
+    borderRadius: radii.sm,
+    borderWidth: 1,
+    borderColor: colors.borderDefault,
+  },
+  shareButtonText: {
+    ...typography.body,
+    color: colors.textPrimary,
+    fontWeight: '600',
   },
 });
