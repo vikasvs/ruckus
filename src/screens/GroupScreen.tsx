@@ -193,11 +193,23 @@ function MembersTab() {
     }
   };
 
+  const [codeCopied, setCodeCopied] = useState(false);
+
   const handleCopyInviteCode = () => {
     if (currentGroup?.invite_code) {
       Clipboard.setString(currentGroup.invite_code);
-      Alert.alert('Copied!', 'Invite code copied to clipboard');
+      setCodeCopied(true);
+      setTimeout(() => setCodeCopied(false), 2000);
     }
+  };
+
+  const handleShareInviteCode = async () => {
+    if (!currentGroup) return;
+    try {
+      await Share.share({
+        message: `Join "${currentGroup.name}" on Ruckus! Code: ${currentGroup.invite_code}`,
+      });
+    } catch (_) {}
   };
 
   const handleToggleNotifications = async (value: boolean) => {
@@ -223,11 +235,20 @@ function MembersTab() {
   return (
     <View style={styles.membersContainer}>
       {currentGroup && (
-        <TouchableOpacity style={styles.inviteCodeCard} onPress={handleCopyInviteCode}>
-          <Text style={styles.inviteCodeLabel}>INVITE CODE</Text>
-          <Text style={styles.inviteCode}>{currentGroup.invite_code}</Text>
-          <Text style={styles.tapToCopy}>Tap to copy</Text>
-        </TouchableOpacity>
+        <View style={styles.inviteCodeCard}>
+          <View style={styles.inviteCodeLeft}>
+            <Text style={styles.inviteCodeLabel}>INVITE CODE</Text>
+            <Text style={styles.inviteCode}>{currentGroup.invite_code}</Text>
+          </View>
+          <View style={styles.inviteCodeActions}>
+            <TouchableOpacity onPress={handleCopyInviteCode}>
+              <Text style={styles.inviteActionText}>{codeCopied ? 'Copied!' : 'Copy'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleShareInviteCode}>
+              <Text style={styles.inviteActionText}>Share</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       )}
 
       <View style={styles.notificationToggle}>
@@ -263,43 +284,12 @@ function MembersTab() {
   );
 }
 
-function InviteCodeBar({ inviteCode, groupName }: { inviteCode: string; groupName: string }) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = () => {
-    Clipboard.setString(inviteCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleShare = async () => {
-    try {
-      await Share.share({
-        message: `Join "${groupName}" on Ruckus! Code: ${inviteCode}`,
-      });
-    } catch (_) {}
-  };
-
-  return (
-    <View style={styles.inviteBar}>
-      <TouchableOpacity style={styles.inviteBarContent} onPress={handleCopy}>
-        <Text style={styles.inviteBarCode}>{inviteCode}</Text>
-        <Text style={styles.inviteBarAction}>{copied ? 'Copied!' : 'Copy'}</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={handleShare}>
-        <Text style={styles.inviteBarShare}>Share</Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
-
 export default function GroupScreen() {
   const route = useRoute<GroupScreenRouteProp>();
   const navigation = useNavigation();
-  const { groupId, showInviteCode } = route.params;
+  const { groupId } = route.params;
   const { fetchGroupDetails, fetchMembers, currentGroup, isLoading } = useGroupsStore();
   const { reset: resetStatus } = useStatusStore();
-  const [showBanner, setShowBanner] = useState(!!showInviteCode);
 
   useFocusEffect(
     useCallback(() => {
@@ -330,12 +320,6 @@ export default function GroupScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
-      {showBanner && currentGroup && (
-        <InviteCodeBar
-          inviteCode={currentGroup.invite_code}
-          groupName={currentGroup.name}
-        />
-      )}
       <Tab.Navigator
         screenOptions={{
           tabBarStyle: {
@@ -466,10 +450,15 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: radii.md,
     padding: spacing.cardPadding,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: spacing.lg,
     borderWidth: 1,
     borderColor: colors.borderDefault,
+  },
+  inviteCodeLeft: {
+    flex: 1,
   },
   inviteCodeLabel: {
     ...typography.label,
@@ -477,16 +466,20 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   inviteCode: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: '600',
     color: colors.textPrimary,
-    letterSpacing: 3,
+    letterSpacing: 2,
     fontFamily: typography.monoFamily,
   },
-  tapToCopy: {
-    ...typography.small,
-    color: colors.textLabel,
-    marginTop: spacing.xs,
+  inviteCodeActions: {
+    flexDirection: 'row',
+    gap: spacing.md,
+  },
+  inviteActionText: {
+    ...typography.caption,
+    color: colors.accentActive,
+    fontWeight: '600',
   },
   notificationToggle: {
     flexDirection: 'row',
@@ -507,38 +500,5 @@ const styles = StyleSheet.create({
     ...typography.label,
     color: colors.textMuted,
     marginBottom: spacing.md,
-  },
-  inviteBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.pagePadding,
-    backgroundColor: colors.surfaceMuted,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderSubtle,
-  },
-  inviteBarContent: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  inviteBarCode: {
-    ...typography.caption,
-    fontFamily: typography.monoFamily,
-    color: colors.textSecondary,
-    letterSpacing: 1.5,
-    fontWeight: '500',
-  },
-  inviteBarAction: {
-    ...typography.caption,
-    color: colors.accentActive,
-    fontWeight: '600',
-  },
-  inviteBarShare: {
-    ...typography.caption,
-    color: colors.accentActive,
-    fontWeight: '600',
-    paddingLeft: spacing.md,
   },
 });
