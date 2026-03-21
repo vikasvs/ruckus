@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '@/store/authStore';
 import { createUser } from '@/services/user';
+import { colors, palette, typography, radii, spacing } from '@/theme';
 
 export default function AuthScreen() {
   const [firstName, setFirstName] = useState('');
@@ -44,7 +45,7 @@ export default function AuthScreen() {
         <TextInput
           style={styles.input}
           placeholder="First name"
-          placeholderTextColor="#666"
+          placeholderTextColor={colors.textPlaceholder}
           value={firstName}
           onChangeText={setFirstName}
           autoFocus
@@ -57,7 +58,7 @@ export default function AuthScreen() {
           disabled={isLoading}
         >
           {isLoading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color={colors.textInverse} />
           ) : (
             <Text style={styles.buttonText}>Let's Go</Text>
           )}
@@ -70,7 +71,7 @@ export default function AuthScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: colors.pageBg,
   },
   content: {
     flex: 1,
@@ -80,14 +81,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 36,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: '500',
+    color: colors.textPrimary,
     marginBottom: 10,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 18,
-    color: '#999',
+    color: colors.textMuted,
     marginBottom: 30,
     textAlign: 'center',
   },
@@ -95,25 +96,25 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 50,
     borderWidth: 1,
-    borderColor: '#333',
-    borderRadius: 8,
+    borderColor: colors.borderDefault,
+    borderRadius: radii.md,
     paddingHorizontal: 15,
     fontSize: 16,
     marginBottom: 20,
-    backgroundColor: '#1E1E1E',
-    color: '#fff',
+    backgroundColor: colors.surface,
+    color: colors.textPrimary,
   },
   button: {
     width: '100%',
     height: 50,
-    backgroundColor: '#FF4458',
-    borderRadius: 8,
+    backgroundColor: colors.accentActive,
+    borderRadius: radii.md,
     justifyContent: 'center',
     alignItems: 'center',
   },
   buttonText: {
-    color: '#fff',
+    color: colors.textInverse,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '500',
   },
 });

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { GroupWithMembership } from '@/types';
+import { colors, palette, radii, spacing, shadows } from '@/theme';
 
 interface GroupCardProps {
   group: GroupWithMembership;
@@ -39,14 +40,14 @@ export default function GroupCard({ group, onPress, onSharePress }: GroupCardPro
         <View style={styles.statusContainer}>
           {ruckedCount > 0 && (
             <View style={[styles.statusBadge, styles.ruckedBadge]}>
-              <Text style={styles.statusText}>
+              <Text style={[styles.statusText, styles.ruckedText]}>
                 {ruckedCount} rucked
               </Text>
             </View>
           )}
           {rickedCount > 0 && (
             <View style={[styles.statusBadge, styles.rickedBadge]}>
-              <Text style={styles.statusText}>
+              <Text style={[styles.statusText, styles.rickedText]}>
                 {rickedCount} ricked
               </Text>
             </View>
@@ -59,10 +60,15 @@ export default function GroupCard({ group, onPress, onSharePress }: GroupCardPro
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#1E1E1E',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    backgroundColor: colors.surface,
+    borderRadius: radii.md,
+    padding: spacing.cardPadding,
+    marginBottom: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.borderDefault,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.accentActive,
+    ...shadows.card,
   },
   header: {
     flexDirection: 'row',
@@ -71,31 +77,31 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: '500',
+    color: colors.textPrimary,
     flex: 1,
   },
   shareButton: {
-    backgroundColor: '#333',
+    backgroundColor: colors.surfaceHover,
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 6,
+    borderRadius: radii.sm,
     marginLeft: 8,
   },
   shareIcon: {
-    color: '#fff',
+    color: colors.textSecondary,
     fontSize: 14,
   },
   activeDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#4CAF50',
+    backgroundColor: palette.feedback.success.base,
     marginLeft: 8,
   },
   memberCount: {
     fontSize: 14,
-    color: '#999',
+    color: colors.textMuted,
     marginBottom: 10,
   },
   statusContainer: {
@@ -105,17 +111,22 @@ const styles = StyleSheet.create({
   statusBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: radii.pill,
   },
   ruckedBadge: {
-    backgroundColor: 'rgba(255, 68, 88, 0.2)',
+    backgroundColor: colors.ruckedBg,
   },
   rickedBadge: {
-    backgroundColor: 'rgba(156, 39, 176, 0.2)',
+    backgroundColor: colors.rickedBg,
   },
   statusText: {
     fontSize: 12,
-    color: '#fff',
-    fontWeight: '600',
+    fontWeight: '500',
+  },
+  ruckedText: {
+    color: colors.ruckedText,
+  },
+  rickedText: {
+    color: colors.rickedText,
   },
 });

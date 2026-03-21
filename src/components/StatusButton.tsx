@@ -1,5 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
+import { colors, palette, radii } from '@/theme';
 
 interface StatusButtonProps {
   type: 'rucked' | 'ricked';
@@ -49,38 +50,38 @@ export default function StatusButton({
 const styles = StyleSheet.create({
   button: {
     flex: 1,
-    height: 120,
-    borderRadius: 15,
+    height: 100,
+    borderRadius: radii.md,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
     overflow: 'hidden',
   },
   ruckedButton: {
-    backgroundColor: '#FF4458',
+    backgroundColor: colors.ruckedFill,
   },
   rickedButton: {
-    backgroundColor: '#9C27B0',
+    backgroundColor: colors.rickedFill,
   },
   activeButton: {
     borderWidth: 3,
-    borderColor: '#fff',
+    borderColor: colors.borderActive,
   },
   disabledButton: {
     opacity: 0.5,
   },
   buttonText: {
-    color: '#fff',
+    color: colors.textInverse,
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '500',
   },
   cooldownOverlay: {
     position: 'absolute',
     bottom: 10,
   },
   cooldownText: {
-    color: '#fff',
+    color: colors.textInverse,
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '500',
   },
 });
