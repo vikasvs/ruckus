@@ -1,18 +1,20 @@
 import { create } from 'zustand';
-import { Session, User } from '@supabase/supabase-js';
-import { getSupabase } from '@/services/supabase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User as AppUser } from '@/types';
+import { getUserProfile } from '@/services/user';
+
+const USER_ID_KEY = 'ruckus_user_id';
 
 interface AuthState {
-  session: Session | null;
-  user: User | null;
+  session: { userId: string } | null;
+  user: { id: string } | null;
   profile: AppUser | null;
   isLoading: boolean;
   isInitialized: boolean;
   needsName: boolean;
 
   initialize: () => Promise<void>;
-  setSession: (_session: Session | null) => void;
+  setUser: (_userId: string) => Promise<void>;
   setProfile: (_profile: AppUser | null) => void;
   signOut: () => Promise<void>;
   fetchProfile: () => Promise<void>;
@@ -29,34 +31,26 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   initialize: async () => {
     try {
       set({ isLoading: true });
-      const supabase = getSupabase();
 
-      const { data: { session } } = await supabase.auth.getSession();
+      const storedUserId = await AsyncStorage.getItem(USER_ID_KEY);
 
-      if (session) {
-        set({ session, user: session.user });
+      if (storedUserId) {
+        set({ session: { userId: storedUserId }, user: { id: storedUserId } });
         await get().fetchProfile();
+      } else {
+        set({ needsName: true });
       }
-
-      // Listen for auth changes
-      supabase.auth.onAuthStateChange(async (event, session) => {
-        set({ session, user: session?.user || null });
-
-        if (session) {
-          await get().fetchProfile();
-        } else {
-          set({ profile: null, needsName: false });
-        }
-      });
     } catch (error) {
       console.error('Auth initialization error:', error);
+      set({ needsName: true });
     } finally {
       set({ isLoading: false, isInitialized: true });
     }
   },
 
-  setSession: (session) => {
-    set({ session, user: session?.user || null });
+  setUser: async (userId: string) => {
+    await AsyncStorage.setItem(USER_ID_KEY, userId);
+    set({ session: { userId }, user: { id: userId } });
   },
 
   setProfile: (profile) => {
@@ -68,21 +62,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (!user) return;
 
     try {
-      const supabase = getSupabase();
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', user.id)
-        .single();
+      const profile = await getUserProfile(user.id);
 
-      if (error && error.code !== 'PGRST116') {
-        throw error;
-      }
-
-      if (data) {
-        set({ profile: data as AppUser, needsName: false });
+      if (profile) {
+        set({ profile, needsName: false });
       } else {
-        set({ needsName: true });
+        await AsyncStorage.removeItem(USER_ID_KEY);
+        set({ session: null, user: null, needsName: true });
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -90,15 +76,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signOut: async () => {
-    try {
-      const supabase = getSupabase();
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-
-      set({ session: null, user: null, profile: null, needsName: false });
-    } catch (error) {
-      console.error('Sign out error:', error);
-      throw error;
-    }
+    await AsyncStorage.removeItem(USER_ID_KEY);
+    set({ session: null, user: null, profile: null, needsName: true });
   },
 }));

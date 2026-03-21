@@ -9,40 +9,27 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { signUp, signIn } from '@/services/auth';
+import { useAuthStore } from '@/store/authStore';
+import { createUser } from '@/services/user';
 
 export default function AuthScreen() {
-  const [isLoginMode, setIsLoginMode] = useState(false);
-  const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { setUser, fetchProfile } = useAuthStore();
 
-  const handleSubmit = async () => {
-    if (!phone.trim()) {
-      Alert.alert('Error', 'Please enter your phone number');
-      return;
-    }
-    if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters');
+  const handleContinue = async () => {
+    if (!firstName.trim()) {
+      Alert.alert('Error', 'Please enter your name');
       return;
     }
 
     try {
       setIsLoading(true);
-      if (isLoginMode) {
-        await signIn(phone, password);
-      } else {
-        await signUp(phone, password);
-      }
+      const user = await createUser(firstName.trim());
+      await setUser(user.id);
+      await fetchProfile();
     } catch (error: any) {
-      const message = error.message || 'An error occurred';
-      if (!isLoginMode && message.includes('already registered')) {
-        Alert.alert('Error', 'This phone number is already registered. Try logging in.');
-      } else if (isLoginMode) {
-        Alert.alert('Error', 'Invalid phone number or password.');
-      } else {
-        Alert.alert('Error', message);
-      }
+      Alert.alert('Error', error.message || 'An error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -52,45 +39,28 @@ export default function AuthScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>Ruckus</Text>
+        <Text style={styles.subtitle}>What should we call you?</Text>
 
         <TextInput
           style={styles.input}
-          placeholder="Phone number"
+          placeholder="First name"
           placeholderTextColor="#666"
-          value={phone}
-          onChangeText={setPhone}
-          keyboardType="phone-pad"
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor="#666"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
+          value={firstName}
+          onChangeText={setFirstName}
+          autoFocus
+          autoCapitalize="words"
         />
 
         <TouchableOpacity
           style={styles.button}
-          onPress={handleSubmit}
+          onPress={handleContinue}
           disabled={isLoading}
         >
           {isLoading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>
-              {isLoginMode ? 'Log In' : 'Sign Up'}
-            </Text>
+            <Text style={styles.buttonText}>Let's Go</Text>
           )}
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => setIsLoginMode(!isLoginMode)}>
-          <Text style={styles.toggleText}>
-            {isLoginMode
-              ? "Don't have an account? Sign Up"
-              : 'Already have an account? Log In'}
-          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -112,7 +82,13 @@ const styles = StyleSheet.create({
     fontSize: 36,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 40,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 18,
+    color: '#999',
+    marginBottom: 30,
     textAlign: 'center',
   },
   input: {
@@ -123,7 +99,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 15,
     fontSize: 16,
-    marginBottom: 16,
+    marginBottom: 20,
     backgroundColor: '#1E1E1E',
     color: '#fff',
   },
@@ -134,17 +110,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 4,
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
-  },
-  toggleText: {
-    marginTop: 20,
-    color: '#999',
-    fontSize: 14,
-    textAlign: 'center',
   },
 });

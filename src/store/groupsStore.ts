@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { getSupabase } from '@/services/supabase';
 import {
   Group,
   GroupMember,
@@ -11,6 +10,7 @@ import {
   joinGroup as joinGroupService,
   getUserGroups,
   getGroupMembers,
+  getGroupDetails,
 } from '@/services/groups';
 
 interface GroupsState {
@@ -40,33 +40,32 @@ export const useGroupsStore = create<GroupsState>((set, get) => ({
   fetchGroups: async (userId: string) => {
     try {
       set({ isLoading: true, error: null });
-      const supabase = getSupabase();
 
-      const memberships = await getUserGroups(userId);
+      const rows = await getUserGroups(userId);
 
-      const groupsWithDetails: GroupWithMembership[] = await Promise.all(
-        memberships.map(async (membership: any) => {
-          const group = membership.groups as Group;
-
-          // Get member counts and active status counts
-          const { data: members } = await supabase
-            .from('group_members')
-            .select('current_status')
-            .eq('group_id', group.id);
-
-          const member_count = members?.length || 0;
-          const active_rucked_count = members?.filter(m => m.current_status === 'rucked').length || 0;
-          const active_ricked_count = members?.filter(m => m.current_status === 'ricked').length || 0;
-
-          return {
-            ...group,
-            membership: membership as GroupMember,
-            member_count,
-            active_rucked_count,
-            active_ricked_count,
-          };
-        })
-      );
+      const groupsWithDetails: GroupWithMembership[] = rows.map((row: any) => ({
+        id: row.id,
+        name: row.name,
+        invite_code: row.invite_code,
+        created_by: row.created_by,
+        created_at: row.created_at,
+        is_active: row.is_active,
+        settings: row.settings,
+        metadata: row.metadata,
+        membership: {
+          id: row.membership_id,
+          group_id: row.id,
+          user_id: userId,
+          joined_at: row.joined_at,
+          is_admin: row.is_admin,
+          notifications_enabled: row.notifications_enabled,
+          current_status: row.current_status,
+          status_updated_at: row.status_updated_at,
+        } as GroupMember,
+        member_count: parseInt(row.member_count) || 0,
+        active_rucked_count: parseInt(row.active_rucked_count) || 0,
+        active_ricked_count: parseInt(row.active_ricked_count) || 0,
+      }));
 
       set({ groups: groupsWithDetails, isLoading: false });
     } catch (error: any) {
@@ -78,16 +77,7 @@ export const useGroupsStore = create<GroupsState>((set, get) => ({
   fetchGroupDetails: async (groupId: string) => {
     try {
       set({ isLoading: true, error: null });
-      const supabase = getSupabase();
-
-      const { data, error } = await supabase
-        .from('groups')
-        .select('*')
-        .eq('id', groupId)
-        .single();
-
-      if (error) throw error;
-
+      const data = await getGroupDetails(groupId);
       set({ currentGroup: data as Group, isLoading: false });
     } catch (error: any) {
       set({ error: error.message, isLoading: false });
@@ -98,9 +88,7 @@ export const useGroupsStore = create<GroupsState>((set, get) => ({
   fetchMembers: async (groupId: string) => {
     try {
       set({ isLoading: true, error: null });
-
       const members = await getGroupMembers(groupId);
-
       set({
         currentGroupMembers: members as GroupMemberWithUser[],
         isLoading: false,
@@ -114,12 +102,8 @@ export const useGroupsStore = create<GroupsState>((set, get) => ({
   createGroup: async (name: string, userId: string) => {
     try {
       set({ isLoading: true, error: null });
-
       const group = await createGroupService(name, userId);
-
-      // Refresh groups list
       await get().fetchGroups(userId);
-
       set({ isLoading: false });
       return group;
     } catch (error: any) {
@@ -131,12 +115,8 @@ export const useGroupsStore = create<GroupsState>((set, get) => ({
   joinGroup: async (inviteCode: string, userId: string) => {
     try {
       set({ isLoading: true, error: null });
-
       const result = await joinGroupService(inviteCode, userId);
-
-      // Refresh groups list
       await get().fetchGroups(userId);
-
       set({ isLoading: false });
       return result;
     } catch (error: any) {
