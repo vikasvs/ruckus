@@ -7,6 +7,8 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '@/store/authStore';
@@ -38,32 +40,37 @@ export default function AuthScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Ruckus</Text>
-        <Text style={styles.subtitle}>What should we call you?</Text>
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoid}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <View style={styles.content}>
+          <Text style={styles.title}>Ruckus</Text>
+          <Text style={styles.subtitle}>What should we call you?</Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="First name"
-          placeholderTextColor={colors.textPlaceholder}
-          value={firstName}
-          onChangeText={setFirstName}
-          autoFocus
-          autoCapitalize="words"
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="First name"
+            placeholderTextColor={colors.textPlaceholder}
+            value={firstName}
+            onChangeText={setFirstName}
+            autoFocus
+            autoCapitalize="words"
+          />
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handleContinue}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <ActivityIndicator color={colors.textInverse} />
-          ) : (
-            <Text style={styles.buttonText}>Let's Go</Text>
-          )}
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleContinue}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator color={colors.textInverse} />
+            ) : (
+              <Text style={styles.buttonText}>Let's Go</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -72,6 +79,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.pageBg,
+  },
+  keyboardAvoid: {
+    flex: 1,
   },
   content: {
     flex: 1,

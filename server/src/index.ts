@@ -7,7 +7,18 @@ import statusRouter from './routes/status';
 const app = express();
 const PORT = parseInt(process.env.PORT || '3000', 10);
 
-app.use(cors());
+// Chrome Private Network Access: must be set before CORS preflight
+app.use((_req, res, next) => {
+  res.setHeader('Access-Control-Allow-Private-Network', 'true');
+  next();
+});
+
+app.use(cors({
+  origin: true,
+  methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Access-Control-Request-Private-Network'],
+}));
+
 app.use(express.json());
 
 app.get('/health', (_req, res) => {

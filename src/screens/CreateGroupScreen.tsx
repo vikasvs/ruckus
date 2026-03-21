@@ -54,12 +54,12 @@ export default function CreateGroupScreen() {
             text: 'Copy Code',
             onPress: () => {
               Clipboard.setString(group.invite_code);
-              navigation.navigate('Group', { groupId: group.id });
+              navigation.replace('Group', { groupId: group.id });
             },
           },
           {
             text: 'OK',
-            onPress: () => navigation.navigate('Group', { groupId: group.id }),
+            onPress: () => navigation.replace('Group', { groupId: group.id }),
           },
         ]
       );

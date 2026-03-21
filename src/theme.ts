@@ -120,29 +120,34 @@ export const colors = {
 
 // ─── Layer 3: System Rules ───────────────────────────────────
 
+const fontSans = "Geist, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const fontMono = "Geist Mono, ui-monospace, 'SF Mono', monospace";
+
 export const typography = {
   // Geist by Vercel — tight apertures, distinctive t/j terminals
   // Falls back to system-ui for native platforms without Geist loaded
-  fontFamily: "'Geist', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-  monoFamily: "'Geist Mono', ui-monospace, 'SF Mono', monospace",
+  fontFamily: fontSans,
+  monoFamily: fontMono,
 
   // Display — large titles, hero text
-  // Negative letter-spacing for that dense, locked-in feel
   display: {
+    fontFamily: fontSans,
     fontSize: 48,
     fontWeight: '600' as const,
-    letterSpacing: -1.5, // approx -0.03em at 48px
+    letterSpacing: -1.5,
   },
 
   // Heading — section titles
   heading: {
+    fontFamily: fontSans,
     fontSize: 28,
     fontWeight: '600' as const,
-    letterSpacing: -0.8, // approx -0.03em at 28px
+    letterSpacing: -0.8,
   },
 
   // Subheading — card titles, group names
   subheading: {
+    fontFamily: fontSans,
     fontSize: 17,
     fontWeight: '500' as const,
     letterSpacing: -0.2,
@@ -150,6 +155,7 @@ export const typography = {
 
   // Body — default text
   body: {
+    fontFamily: fontSans,
     fontSize: 15,
     fontWeight: '400' as const,
     letterSpacing: 0,
@@ -157,6 +163,7 @@ export const typography = {
 
   // Caption — timestamps, secondary info
   caption: {
+    fontFamily: fontSans,
     fontSize: 13,
     fontWeight: '400' as const,
     letterSpacing: 0,
@@ -164,6 +171,7 @@ export const typography = {
 
   // Label — badges, section labels
   label: {
+    fontFamily: fontSans,
     fontSize: 11,
     fontWeight: '600' as const,
     letterSpacing: 0.5,
@@ -171,6 +179,7 @@ export const typography = {
 
   // Small — helper text
   small: {
+    fontFamily: fontSans,
     fontSize: 11,
     fontWeight: '400' as const,
     letterSpacing: 0,
@@ -178,6 +187,7 @@ export const typography = {
 
   // Mono — invite codes, keybindings
   mono: {
+    fontFamily: fontMono,
     fontSize: 14,
     fontWeight: '500' as const,
     letterSpacing: 1,
