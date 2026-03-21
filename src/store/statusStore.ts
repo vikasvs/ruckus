@@ -29,7 +29,7 @@ interface StatusState {
   reset: () => void;
 }
 
-let cooldownInterval: NodeJS.Timeout | null = null;
+let cooldownInterval: ReturnType<typeof setInterval> | null = null;
 
 export const useStatusStore = create<StatusState>((set, get) => ({
   currentStatus: null,

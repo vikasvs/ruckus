@@ -27,8 +27,8 @@ export default function MemberItem({ member, isCurrentUser }: MemberItemProps) {
   };
 
   const firstName = member.users?.first_name || 'Unknown';
-  const hasStatus = member.current_status !== null;
-  const statusColor = getStatusColor(member.current_status);
+  const hasStatus = member.current_status != null;
+  const statusColor = getStatusColor(member.current_status ?? null);
 
   return (
     <View style={styles.container}>

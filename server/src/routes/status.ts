@@ -147,7 +147,10 @@ async function sendStatusPush(userId: string, groupId: string, statusType: strin
   const tokensResult = await pool.query(
     `SELECT u.push_token FROM group_members gm
      JOIN users u ON gm.user_id = u.id
-     WHERE gm.group_id = $1 AND gm.user_id != $2 AND u.push_token IS NOT NULL`,
+     WHERE gm.group_id = $1
+       AND gm.user_id != $2
+       AND gm.notifications_enabled = TRUE
+       AND u.push_token IS NOT NULL`,
     [groupId, userId]
   );
 

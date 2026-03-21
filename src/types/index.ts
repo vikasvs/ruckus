@@ -58,8 +58,8 @@ export type RootStackParamList = {
 };
 
 export type TabParamList = {
-  Activity: undefined;
-  Members: undefined;
+  Activity: { groupId: string };
+  Members: { groupId: string };
 };
 
 // Extended types with relationships
