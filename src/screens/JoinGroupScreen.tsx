@@ -53,7 +53,7 @@ export default function JoinGroupScreen() {
       Alert.alert('Success', `You've joined ${group.name}!`, [
         {
           text: 'OK',
-          onPress: () => navigation.navigate('Group', { groupId: group.id }),
+          onPress: () => navigation.replace('Group', { groupId: group.id }),
         },
       ]);
     } catch (error: any) {

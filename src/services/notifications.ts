@@ -96,7 +96,7 @@ export async function registerForPushNotifications(userId: string): Promise<stri
 
     return token;
   } catch (error) {
-    console.error('Error getting push token:', error);
+    console.warn('Push notifications unavailable:', (error as Error).message);
     return null;
   }
 }
