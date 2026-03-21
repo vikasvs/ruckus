@@ -7,6 +7,9 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '@/store/authStore';
@@ -38,32 +41,46 @@ export default function AuthScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Ruckus</Text>
-        <Text style={styles.subtitle}>What should we call you?</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="First name"
-          placeholderTextColor={colors.textPlaceholder}
-          value={firstName}
-          onChangeText={setFirstName}
-          autoFocus
-          autoCapitalize="words"
-        />
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handleContinue}
-          disabled={isLoading}
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          bounces={false}
         >
-          {isLoading ? (
-            <ActivityIndicator color={colors.textInverse} />
-          ) : (
-            <Text style={styles.buttonText}>Let's Go</Text>
-          )}
-        </TouchableOpacity>
-      </View>
+          <View style={styles.content}>
+            <Text style={styles.title}>Ruckus</Text>
+            <Text style={styles.subtitle}>What should we call you?</Text>
+
+            <TextInput
+              style={styles.input}
+              placeholder="First name"
+              placeholderTextColor={colors.textPlaceholder}
+              value={firstName}
+              onChangeText={setFirstName}
+              autoFocus
+              autoCapitalize="words"
+              returnKeyType="go"
+              onSubmitEditing={handleContinue}
+            />
+
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleContinue}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color={colors.textInverse} />
+              ) : (
+                <Text style={styles.buttonText}>Let's Go</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -73,10 +90,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.pageBg,
   },
-  content: {
+  keyboardView: {
     flex: 1,
-    paddingHorizontal: spacing.pagePadding,
+  },
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
+  },
+  content: {
+    paddingHorizontal: spacing.pagePadding,
     maxWidth: 400,
     width: '100%',
     alignSelf: 'center',

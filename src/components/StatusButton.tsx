@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
-import { colors, radii, typography } from '@/theme';
+import { colors, palette, radii, typography } from '@/theme';
 
 interface StatusButtonProps {
   type: 'rucked' | 'ricked';
@@ -28,19 +28,21 @@ export default function StatusButton({
       style={[
         styles.button,
         type === 'rucked' ? styles.ruckedButton : styles.rickedButton,
-        isActive && (type === 'rucked' ? styles.ruckedActive : styles.rickedActive),
+        isActive && styles.activeButton,
         isDisabled && styles.disabledButton,
       ]}
       onPress={onPress}
       disabled={isDisabled}
       activeOpacity={0.8}
     >
-      <Text style={styles.buttonText}>
+      <Text style={[styles.buttonText, isActive && styles.activeText]}>
         {type === 'rucked' ? 'Rucked Up' : 'Ricked Up'}
       </Text>
       {cooldownSeconds > 0 && (
         <View style={styles.cooldownOverlay}>
-          <Text style={styles.cooldownText}>{formatCooldown(cooldownSeconds)}</Text>
+          <Text style={[styles.cooldownText, isActive && styles.activeText]}>
+            {formatCooldown(cooldownSeconds)}
+          </Text>
         </View>
       )}
     </TouchableOpacity>
@@ -56,20 +58,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     position: 'relative',
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: colors.borderDefault,
+    backgroundColor: colors.surface,
   },
   ruckedButton: {
-    backgroundColor: colors.ruckedFill,
+    // Parallel charcoal/dark style — not the old red
+    backgroundColor: palette.neutral[800],
   },
   rickedButton: {
-    backgroundColor: colors.rickedFill,
+    // Parallel blue accent
+    backgroundColor: palette.feedback.info.base,
   },
-  ruckedActive: {
+  activeButton: {
     borderWidth: 3,
-    borderColor: colors.textPrimary,
-  },
-  rickedActive: {
-    borderWidth: 3,
-    borderColor: colors.textPrimary,
+    borderColor: colors.accentActive,
   },
   disabledButton: {
     opacity: 0.4,
@@ -78,6 +81,9 @@ const styles = StyleSheet.create({
     color: colors.textInverse,
     ...typography.subheading,
     fontWeight: '600',
+  },
+  activeText: {
+    // keep white on active
   },
   cooldownOverlay: {
     position: 'absolute',

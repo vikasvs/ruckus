@@ -7,6 +7,9 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -50,12 +53,14 @@ export default function JoinGroupScreen() {
       setIsSubmitting(true);
       const { group } = await joinGroup(inviteCode, user.id);
 
-      Alert.alert('Success', `You've joined ${group.name}!`, [
-        {
-          text: 'OK',
-          onPress: () => navigation.navigate('Group', { groupId: group.id }),
-        },
-      ]);
+      // Navigate to group, reset stack so back goes to Home
+      navigation.reset({
+        index: 1,
+        routes: [
+          { name: 'Home' },
+          { name: 'Group', params: { groupId: group.id } },
+        ],
+      });
     } catch (error: any) {
       let errorMessage = error.message || 'Failed to join group';
 
@@ -75,39 +80,52 @@ export default function JoinGroupScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Join a Group</Text>
-        <Text style={styles.subtitle}>
-          Enter the 8-character invite code from your friend
-        </Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="ABCD1234"
-          placeholderTextColor={colors.textPlaceholder}
-          value={inviteCode}
-          onChangeText={(text) => setInviteCode(formatInviteCode(text))}
-          maxLength={8}
-          autoCapitalize="characters"
-          editable={!isSubmitting}
-        />
-
-        <Text style={styles.helperText}>
-          Codes are not case-sensitive
-        </Text>
-
-        <TouchableOpacity
-          style={[styles.button, isSubmitting && styles.buttonDisabled]}
-          onPress={handleJoinGroup}
-          disabled={isSubmitting}
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          bounces={false}
         >
-          {isSubmitting ? (
-            <ActivityIndicator color={colors.textInverse} />
-          ) : (
-            <Text style={styles.buttonText}>Join Group</Text>
-          )}
-        </TouchableOpacity>
-      </View>
+          <View style={styles.content}>
+            <Text style={styles.title}>Join a Group</Text>
+            <Text style={styles.subtitle}>
+              Enter the 8-character invite code from your friend
+            </Text>
+
+            <TextInput
+              style={styles.input}
+              placeholder="ABCD1234"
+              placeholderTextColor={colors.textPlaceholder}
+              value={inviteCode}
+              onChangeText={(text) => setInviteCode(formatInviteCode(text))}
+              maxLength={8}
+              autoCapitalize="characters"
+              editable={!isSubmitting}
+              returnKeyType="go"
+              onSubmitEditing={handleJoinGroup}
+            />
+
+            <Text style={styles.helperText}>
+              Codes are not case-sensitive
+            </Text>
+
+            <TouchableOpacity
+              style={[styles.button, isSubmitting && styles.buttonDisabled]}
+              onPress={handleJoinGroup}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <ActivityIndicator color={colors.textInverse} />
+              ) : (
+                <Text style={styles.buttonText}>Join Group</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -117,10 +135,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.pageBg,
   },
-  content: {
+  keyboardView: {
     flex: 1,
-    paddingHorizontal: spacing.pagePadding,
+  },
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
+  },
+  content: {
+    paddingHorizontal: spacing.pagePadding,
     maxWidth: 400,
     width: '100%',
     alignSelf: 'center',

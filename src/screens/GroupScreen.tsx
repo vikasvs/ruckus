@@ -135,7 +135,7 @@ function ActivityTab() {
                 styles.progressFill,
                 {
                   width: `${(cooldownRemaining / 60) * 100}%`,
-                  backgroundColor: currentStatus === 'rucked' ? colors.ruckedFill : colors.rickedFill,
+                  backgroundColor: currentStatus === 'rucked' ? palette.neutral[800] : palette.feedback.info.base,
                 },
               ]}
             />
@@ -317,13 +317,23 @@ export default function GroupScreen() {
           name="Activity"
           component={ActivityTab}
           initialParams={{ groupId }}
-          options={{ title: 'Activity' }}
+          options={{
+            title: 'Activity',
+            tabBarIcon: ({ color }) => (
+              <Text style={{ fontSize: 18, color }}>⚡</Text>
+            ),
+          }}
         />
         <Tab.Screen
           name="Members"
           component={MembersTab}
           initialParams={{ groupId }}
-          options={{ title: 'Members' }}
+          options={{
+            title: 'Members',
+            tabBarIcon: ({ color }) => (
+              <Text style={{ fontSize: 18, color }}>👥</Text>
+            ),
+          }}
         />
       </Tab.Navigator>
     </SafeAreaView>
@@ -359,11 +369,11 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
   ruckedText: {
-    color: colors.ruckedFill,
+    color: palette.neutral[800],
     fontWeight: '600',
   },
   rickedText: {
-    color: colors.rickedFill,
+    color: palette.feedback.info.base,
     fontWeight: '600',
   },
   buttonSection: {
