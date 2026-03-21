@@ -28,9 +28,11 @@ import { colors, palette, radii, spacing, typography } from '@/theme';
 const Tab = createBottomTabNavigator<TabParamList>();
 
 type GroupScreenRouteProp = RouteProp<RootStackParamList, 'Group'>;
+type ActivityTabRouteProp = RouteProp<TabParamList, 'Activity'>;
+type MembersTabRouteProp = RouteProp<TabParamList, 'Members'>;
 
 function ActivityTab() {
-  const route = useRoute<GroupScreenRouteProp>();
+  const route = useRoute<ActivityTabRouteProp>();
   const { groupId } = route.params;
   const { user } = useAuthStore();
   const { currentGroupMembers, fetchMembers } = useGroupsStore();
@@ -170,7 +172,7 @@ function ActivityTab() {
 }
 
 function MembersTab() {
-  const route = useRoute<GroupScreenRouteProp>();
+  const route = useRoute<MembersTabRouteProp>();
   const { groupId } = route.params;
   const { user } = useAuthStore();
   const { currentGroup, currentGroupMembers, fetchMembers } = useGroupsStore();
@@ -284,12 +286,43 @@ function MembersTab() {
   );
 }
 
+function InviteCodeBar({ inviteCode, groupName }: { inviteCode: string; groupName: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    Clipboard.setString(inviteCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        message: `Join "${groupName}" on Ruckus! Code: ${inviteCode}`,
+      });
+    } catch (_) {}
+  };
+
+  return (
+    <View style={styles.inviteBar}>
+      <TouchableOpacity style={styles.inviteBarContent} onPress={handleCopy}>
+        <Text style={styles.inviteBarCode}>{inviteCode}</Text>
+        <Text style={styles.inviteBarAction}>{copied ? 'Copied!' : 'Copy'}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={handleShare}>
+        <Text style={styles.inviteBarShare}>Share</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
 export default function GroupScreen() {
   const route = useRoute<GroupScreenRouteProp>();
   const navigation = useNavigation();
-  const { groupId } = route.params;
+  const { groupId, showInviteCode } = route.params;
   const { fetchGroupDetails, fetchMembers, currentGroup, isLoading } = useGroupsStore();
   const { reset: resetStatus } = useStatusStore();
+  const [showBanner] = useState(!!showInviteCode);
 
   useFocusEffect(
     useCallback(() => {
@@ -320,6 +353,12 @@ export default function GroupScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
+      {showBanner && currentGroup && (
+        <InviteCodeBar
+          inviteCode={currentGroup.invite_code}
+          groupName={currentGroup.name}
+        />
+      )}
       <Tab.Navigator
         screenOptions={{
           tabBarStyle: {
@@ -500,5 +539,38 @@ const styles = StyleSheet.create({
     ...typography.label,
     color: colors.textMuted,
     marginBottom: spacing.md,
+  },
+  inviteBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.pagePadding,
+    backgroundColor: colors.surfaceMuted,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderSubtle,
+  },
+  inviteBarContent: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  inviteBarCode: {
+    ...typography.caption,
+    fontFamily: typography.monoFamily,
+    color: colors.textSecondary,
+    letterSpacing: 1.5,
+    fontWeight: '500',
+  },
+  inviteBarAction: {
+    ...typography.caption,
+    color: colors.accentActive,
+    fontWeight: '600',
+  },
+  inviteBarShare: {
+    ...typography.caption,
+    color: colors.accentActive,
+    fontWeight: '600',
+    paddingLeft: spacing.md,
   },
 });
