@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { colors, palette, radii, spacing } from '@/theme';
 
 interface EmptyStateProps {
   icon?: string;
@@ -40,30 +41,31 @@ const styles = StyleSheet.create({
   icon: {
     fontSize: 48,
     marginBottom: 16,
+    color: colors.textLabel,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: '500',
+    color: colors.textPrimary,
     marginBottom: 12,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    color: '#999',
+    color: colors.textMuted,
     textAlign: 'center',
     lineHeight: 24,
     marginBottom: 24,
   },
   button: {
-    backgroundColor: '#FF4458',
+    backgroundColor: colors.accentActive,
     paddingHorizontal: 24,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: radii.sm,
   },
   buttonText: {
-    color: '#fff',
+    color: colors.textInverse,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '500',
   },
 });

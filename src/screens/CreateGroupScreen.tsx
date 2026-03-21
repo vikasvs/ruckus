@@ -15,6 +15,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@/types';
 import { useAuthStore } from '@/store/authStore';
 import { useGroupsStore } from '@/store/groupsStore';
+import { colors, palette, radii, spacing, typography } from '@/theme';
 
 type CreateGroupScreenNavigationProp = StackNavigationProp<RootStackParamList, 'CreateGroup'>;
 
@@ -80,7 +81,7 @@ export default function CreateGroupScreen() {
         <TextInput
           style={styles.input}
           placeholder="Group name (e.g., 'Friday Night Crew')"
-          placeholderTextColor="#666"
+          placeholderTextColor={colors.textPlaceholder}
           value={groupName}
           onChangeText={setGroupName}
           maxLength={100}
@@ -97,7 +98,7 @@ export default function CreateGroupScreen() {
           disabled={isSubmitting}
         >
           {isSubmitting ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color={colors.textInverse} />
           ) : (
             <Text style={styles.buttonText}>Create Group</Text>
           )}
@@ -110,7 +111,7 @@ export default function CreateGroupScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: colors.pageBg,
   },
   content: {
     flex: 1,
@@ -119,44 +120,46 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: '500',
+    color: colors.textPrimary,
     textAlign: 'center',
     marginBottom: 10,
   },
   subtitle: {
     fontSize: 16,
-    color: '#999',
+    color: colors.textMuted,
     textAlign: 'center',
     marginBottom: 40,
     lineHeight: 24,
   },
   input: {
-    backgroundColor: '#1E1E1E',
-    color: '#fff',
+    backgroundColor: colors.surface,
+    color: colors.textPrimary,
     fontSize: 16,
     padding: 15,
-    borderRadius: 10,
+    borderRadius: radii.md,
     marginBottom: 10,
+    borderWidth: 1,
+    borderColor: colors.borderDefault,
   },
   characterCount: {
-    color: '#666',
+    color: colors.textLabel,
     fontSize: 12,
     textAlign: 'right',
     marginBottom: 30,
   },
   button: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: colors.accentActive,
     padding: 15,
-    borderRadius: 10,
+    borderRadius: radii.sm,
     alignItems: 'center',
   },
   buttonDisabled: {
     opacity: 0.6,
   },
   buttonText: {
-    color: '#fff',
+    color: colors.textInverse,
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '500',
   },
 });

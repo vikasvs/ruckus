@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { GroupMemberWithUser } from '@/types';
+import { colors, palette, spacing, getStatusColor } from '@/theme';
 
 interface MemberItemProps {
   member: GroupMemberWithUser;
@@ -27,11 +28,7 @@ export default function MemberItem({ member, isCurrentUser }: MemberItemProps) {
 
   const firstName = member.users?.first_name || 'Unknown';
   const hasStatus = member.current_status !== null;
-  const statusColor = member.current_status === 'rucked'
-    ? '#FF4458'
-    : member.current_status === 'ricked'
-    ? '#9C27B0'
-    : '#666';
+  const statusColor = getStatusColor(member.current_status);
 
   return (
     <View style={styles.container}>
@@ -70,7 +67,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
+    borderBottomColor: colors.borderSubtle,
   },
   leftContent: {
     flexDirection: 'row',
@@ -84,16 +81,21 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 16,
-    color: '#fff',
+    color: colors.textPrimary,
     fontWeight: '500',
   },
   youTag: {
-    color: '#999',
+    color: colors.textMuted,
     fontWeight: 'normal',
   },
   adminBadge: {
     fontSize: 11,
-    color: '#4CAF50',
+    color: palette.feedback.success.text,
+    backgroundColor: palette.feedback.success.bg,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 4,
+    overflow: 'hidden',
     marginTop: 2,
   },
   rightContent: {
@@ -106,6 +108,6 @@ const styles = StyleSheet.create({
   },
   lastActivity: {
     fontSize: 12,
-    color: '#999',
+    color: colors.textMuted,
   },
 });

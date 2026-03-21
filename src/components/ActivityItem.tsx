@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { StatusEventWithUser } from '@/types';
+import { colors, palette, spacing, getStatusColor } from '@/theme';
 
 interface ActivityItemProps {
   item: StatusEventWithUser;
@@ -28,7 +29,7 @@ export default function ActivityItem({ item }: ActivityItemProps) {
   };
 
   const firstName = item.users?.first_name || 'Someone';
-  const statusColor = item.status_type === 'rucked' ? '#FF4458' : '#9C27B0';
+  const statusColor = getStatusColor(item.status_type);
 
   return (
     <View style={styles.container}>
@@ -54,9 +55,9 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: spacing.listItemPaddingY,
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
+    borderBottomColor: colors.borderSubtle,
   },
   statusDot: {
     width: 10,
@@ -69,7 +70,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 15,
-    color: '#fff',
+    color: colors.textPrimary,
     marginBottom: 2,
   },
   name: {
@@ -80,6 +81,6 @@ const styles = StyleSheet.create({
   },
   time: {
     fontSize: 12,
-    color: '#999',
+    color: colors.textMuted,
   },
 });

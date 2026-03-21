@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList, GroupWithMembership } from '@/types';
+import { colors, palette, radii, spacing } from '@/theme';
 import { useAuthStore } from '@/store/authStore';
 import { useGroupsStore } from '@/store/groupsStore';
 import GroupCard from '@/components/GroupCard';
@@ -91,8 +92,8 @@ export default function HomeScreen() {
           <RefreshControl
             refreshing={isLoading}
             onRefresh={loadGroups}
-            tintColor="#FF4458"
-            colors={['#FF4458']}
+            tintColor={colors.accentActive}
+            colors={[colors.accentActive]}
           />
         }
       />
@@ -109,7 +110,7 @@ export default function HomeScreen() {
           style={styles.joinButton}
           onPress={() => navigation.navigate('JoinGroup')}
         >
-          <Text style={styles.fabText}>Join Group</Text>
+          <Text style={styles.joinButtonText}>Join Group</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -119,36 +120,43 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: colors.pageBg,
   },
   listContainer: {
-    padding: 15,
+    padding: spacing.pagePadding,
   },
   emptyListContainer: {
     flex: 1,
   },
   fab: {
     flexDirection: 'row',
-    padding: 20,
-    gap: 10,
+    padding: spacing.pagePadding,
+    gap: spacing.sm,
   },
   createButton: {
     flex: 1,
-    backgroundColor: '#4CAF50',
-    padding: 15,
-    borderRadius: 10,
+    backgroundColor: colors.accentActive,
+    padding: spacing.lg,
+    borderRadius: radii.sm,
     alignItems: 'center',
   },
   joinButton: {
     flex: 1,
-    backgroundColor: '#2196F3',
-    padding: 15,
-    borderRadius: 10,
+    backgroundColor: colors.surface,
+    padding: spacing.lg,
+    borderRadius: radii.sm,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.borderDefault,
   },
   fabText: {
-    color: '#fff',
+    color: colors.textInverse,
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '500',
+  },
+  joinButtonText: {
+    color: colors.textPrimary,
+    fontSize: 16,
+    fontWeight: '500',
   },
 });

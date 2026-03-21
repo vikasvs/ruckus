@@ -22,6 +22,7 @@ import { updateMemberNotifications } from '@/services/groups';
 import StatusButton from '@/components/StatusButton';
 import ActivityItem from '@/components/ActivityItem';
 import MemberItem from '@/components/MemberItem';
+import { colors, palette, radii, spacing, typography } from '@/theme';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -134,7 +135,7 @@ function ActivityTab() {
                 styles.progressFill,
                 {
                   width: `${(cooldownRemaining / 60) * 100}%`,
-                  backgroundColor: currentStatus === 'rucked' ? '#FF4458' : '#9C27B0',
+                  backgroundColor: currentStatus === 'rucked' ? colors.ruckedFill : colors.rickedFill,
                 },
               ]}
             />
@@ -158,7 +159,7 @@ function ActivityTab() {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={handleRefresh}
-              tintColor="#FF4458"
+              tintColor={colors.accentActive}
             />
           }
         />
@@ -233,8 +234,8 @@ function MembersTab() {
         <Switch
           value={notificationsEnabled}
           onValueChange={handleToggleNotifications}
-          trackColor={{ false: '#333', true: '#4CAF50' }}
-          thumbColor="#fff"
+          trackColor={{ false: colors.borderDefault, true: palette.feedback.success.base }}
+          thumbColor={colors.surface}
         />
       </View>
 
@@ -253,7 +254,7 @@ function MembersTab() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            tintColor="#FF4458"
+            tintColor={colors.accentActive}
           />
         }
       />
@@ -289,7 +290,7 @@ export default function GroupScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#FF4458" />
+          <ActivityIndicator size="large" color={colors.accentActive} />
         </View>
       </SafeAreaView>
     );
@@ -300,11 +301,11 @@ export default function GroupScreen() {
       <Tab.Navigator
         screenOptions={{
           tabBarStyle: {
-            backgroundColor: '#1E1E1E',
-            borderTopColor: '#333',
+            backgroundColor: colors.surface,
+            borderTopColor: colors.borderSubtle,
           },
-          tabBarActiveTintColor: '#FF4458',
-          tabBarInactiveTintColor: '#999',
+          tabBarActiveTintColor: colors.accentActive,
+          tabBarInactiveTintColor: colors.textMuted,
           headerShown: false,
         }}
       >
@@ -328,7 +329,7 @@ export default function GroupScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: colors.pageBg,
   },
   loadingContainer: {
     flex: 1,
@@ -337,7 +338,7 @@ const styles = StyleSheet.create({
   },
   activityContainer: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: colors.pageBg,
     padding: 20,
   },
   statusSection: {
@@ -346,18 +347,18 @@ const styles = StyleSheet.create({
   },
   statusTitle: {
     fontSize: 18,
-    color: '#fff',
+    color: colors.textPrimary,
     marginBottom: 10,
   },
   statusText: {
     fontSize: 16,
-    color: '#999',
+    color: colors.textMuted,
   },
   ruckedText: {
-    color: '#FF4458',
+    color: colors.ruckedFill,
   },
   rickedText: {
-    color: '#9C27B0',
+    color: colors.rickedFill,
   },
   buttonSection: {
     flexDirection: 'row',
@@ -369,12 +370,12 @@ const styles = StyleSheet.create({
   },
   feedTitle: {
     fontSize: 18,
-    color: '#fff',
+    color: colors.textPrimary,
     marginBottom: 15,
-    fontWeight: '600',
+    fontWeight: '500',
   },
   emptyText: {
-    color: '#999',
+    color: colors.textMuted,
     textAlign: 'center',
     fontSize: 16,
     marginTop: 20,
@@ -388,7 +389,7 @@ const styles = StyleSheet.create({
   progressTrack: {
     flex: 1,
     height: 6,
-    backgroundColor: '#333',
+    backgroundColor: colors.cooldownTrack,
     borderRadius: 3,
     overflow: 'hidden',
   },
@@ -397,58 +398,62 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   progressTime: {
-    color: '#fff',
+    color: colors.textPrimary,
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '500',
     width: 35,
     textAlign: 'right',
   },
   membersContainer: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: colors.pageBg,
     padding: 20,
   },
   inviteCodeCard: {
-    backgroundColor: '#1E1E1E',
-    borderRadius: 12,
+    backgroundColor: colors.surface,
+    borderRadius: radii.md,
     padding: 16,
     alignItems: 'center',
     marginBottom: 20,
+    borderWidth: 1,
+    borderColor: colors.borderDefault,
   },
   inviteCodeLabel: {
     fontSize: 12,
-    color: '#999',
+    color: colors.textMuted,
     marginBottom: 4,
   },
   inviteCode: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: '500',
+    color: colors.textPrimary,
     letterSpacing: 2,
     fontFamily: 'monospace',
   },
   tapToCopy: {
     fontSize: 11,
-    color: '#666',
+    color: colors.textLabel,
     marginTop: 4,
   },
   notificationToggle: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#1E1E1E',
-    borderRadius: 12,
+    backgroundColor: colors.surface,
+    borderRadius: radii.md,
     padding: 16,
     marginBottom: 20,
+    borderWidth: 1,
+    borderColor: colors.borderDefault,
   },
   notificationLabel: {
     fontSize: 16,
-    color: '#fff',
+    color: colors.textPrimary,
   },
   membersTitle: {
     fontSize: 18,
-    color: '#fff',
+    color: colors.textPrimary,
     marginBottom: 15,
-    fontWeight: '600',
+    fontWeight: '500',
   },
 });

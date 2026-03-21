@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
+import { colors } from '@/theme';
 
 interface LoadingProps {
   message?: string;
@@ -10,7 +11,7 @@ interface LoadingProps {
 export default function Loading({
   message,
   size = 'large',
-  color = '#FF4458',
+  color = colors.accentActive,
 }: LoadingProps) {
   return (
     <View style={styles.container}>
@@ -25,11 +26,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#121212',
+    backgroundColor: colors.pageBg,
   },
   message: {
     marginTop: 16,
     fontSize: 16,
-    color: '#999',
+    color: colors.textMuted,
   },
 });
