@@ -1,11 +1,9 @@
 import { Router, Request, Response } from 'express';
 import pool from '../db';
 import { v4 as uuidv4 } from 'uuid';
-import { Expo, ExpoPushMessage } from 'expo-server-sdk';
-
-const expo = new Expo();
 
 const router = Router();
+const EXPO_PUSH_ENDPOINT = 'https://exp.host/--/api/v2/push/send';
 
 // Update status (rucked or ricked)
 router.post('/', async (req: Request, res: Response) => {
@@ -154,9 +152,16 @@ async function sendStatusPush(userId: string, groupId: string, statusType: strin
     [groupId, userId]
   );
 
-  const messages: ExpoPushMessage[] = [];
+  const messages: Array<{
+    to: string;
+    sound: 'default';
+    title: string;
+    body: string;
+    data: { groupId: string };
+    channelId: string;
+  }> = [];
   for (const row of tokensResult.rows) {
-    if (!Expo.isExpoPushToken(row.push_token)) continue;
+    if (!isExpoPushToken(row.push_token)) continue;
     messages.push({
       to: row.push_token,
       sound: 'default',
@@ -169,10 +174,43 @@ async function sendStatusPush(userId: string, groupId: string, statusType: strin
 
   if (messages.length === 0) return;
 
-  const chunks = expo.chunkPushNotifications(messages);
-  for (const chunk of chunks) {
-    await expo.sendPushNotificationsAsync(chunk);
+  for (const chunk of chunkMessages(messages, 100)) {
+    const response = await fetch(EXPO_PUSH_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        accept: 'application/json',
+        'accept-encoding': 'gzip, deflate',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(chunk),
+    });
+
+    const result = await response.json().catch(() => null) as
+      | { errors?: unknown[] }
+      | null;
+    if (!response.ok) {
+      throw new Error(
+        `Expo push send failed with ${response.status}: ${JSON.stringify(result)}`
+      );
+    }
+
+    if (result?.errors?.length) {
+      console.warn('Expo push send returned errors:', JSON.stringify(result.errors));
+    }
   }
+}
+
+function isExpoPushToken(token: unknown): token is string {
+  return typeof token === 'string' &&
+    /^(ExponentPushToken|ExpoPushToken)\[[^\]]+\]$/.test(token);
+}
+
+function chunkMessages<T>(items: T[], size: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < items.length; i += size) {
+    chunks.push(items.slice(i, i + size));
+  }
+  return chunks;
 }
 
 export default router;
