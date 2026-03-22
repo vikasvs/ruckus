@@ -78,6 +78,8 @@ Build profiles are defined in `eas.json`:
 - `preview` (internal QA)
 - `production` (store-ready)
 
+Pushes to `main` also trigger the iOS EAS workflow defined in `.eas/workflows/testflight-ios.yml`.
+
 Example commands:
 
 ```bash
