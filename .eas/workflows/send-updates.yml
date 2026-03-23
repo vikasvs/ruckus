@@ -1,0 +1,14 @@
+name: Publish production update
+
+on:
+  push:
+    branches: ['main']
+  workflow_dispatch: {}
+
+jobs:
+  send_update:
+    name: Publish update
+    type: update
+    params:
+      channel: production
+      message: "${{ github.commit_message || 'Automated production update' }}"
