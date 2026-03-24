@@ -16,7 +16,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ruckus.app"
+      "bundleIdentifier": "com.vikassharma.ruckus"
     },
     "android": {
       "adaptiveIcon": {
