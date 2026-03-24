@@ -9,6 +9,7 @@ jobs:
   build_ios:
     name: Build iOS
     type: build
+    environment: production
     params:
       platform: ios
       profile: production

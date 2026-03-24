@@ -9,6 +9,7 @@ jobs:
   send_update:
     name: Publish update
     type: update
+    environment: production
     params:
       channel: production
       message: "${{ github.commit_message || 'Automated production update' }}"
