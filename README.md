@@ -70,7 +70,7 @@ This runs:
 1. `npm run lint`
 2. `npm run typecheck`
 
-## EAS Build / Update
+## EAS Build / Release
 
 Build profiles are defined in `eas.json`:
 
@@ -78,7 +78,7 @@ Build profiles are defined in `eas.json`:
 - `preview` (internal QA)
 - `production` (store-ready)
 
-Pushes to `main` also trigger the iOS EAS workflow defined in `.eas/workflows/testflight-ios.yml`.
+Production releases are binary-only. Pushes to `main` trigger the iOS EAS workflow defined in `.eas/workflows/testflight-ios.yml`, which builds and submits a new TestFlight build.
 
 Example commands:
 
@@ -87,11 +87,7 @@ eas build --platform android --profile preview
 eas build --platform ios --profile production
 ```
 
-OTA update example:
-
-```bash
-eas update --branch production
-```
+For production, do not use `eas update`. Ship changes through a new iOS binary via TestFlight / App Store.
 
 ### Running from a non-git copy
 
