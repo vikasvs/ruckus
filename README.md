@@ -1,144 +1,140 @@
 # Ruckus MVP
 
-Ruckus is a dead-simple group notification app that lets friends broadcast party status with a single tap.
+Ruckus is a lightweight group vibe app where people can tell their crew they are `rucked up` or `ricked up` with one tap.
 
-## Project Structure
+## Architecture
 
 ```text
 ruckusmvp/
-├── src/
-│   ├── components/
-│   ├── config/
-│   ├── navigation/
-│   ├── screens/
-│   ├── services/
-│   ├── store/
-│   ├── types/
-│   └── utils/
-├── supabase/
-│   ├── functions/              # Canonical Edge Function source
-│   ├── edge-functions/         # Legacy duplicate directory (do not deploy from here)
-│   ├── schema.sql
-│   └── schema-safe.sql
+├── src/                       # Expo / React Native app
+├── server/                    # Express + PostgreSQL API for Railway
 ├── assets/
+├── docs/
 └── product-spec.md
 ```
+
+- Mobile client: Expo SDK 54 + React Native
+- Backend: Express + PostgreSQL on Railway
+- Notifications: Expo Push Notifications
+- Release flow: Railway backend deploy + iOS TestFlight binary release on pushes to `main`
 
 ## Requirements
 
 - Node `22.x` (matches `.node-version`)
 - npm
 - Expo account + EAS CLI
-- Supabase project
+- Railway PostgreSQL database
 
 ## Environment Variables
 
-Create `.env` (or copy `.env.example`) and set:
+Root `.env`:
 
 ```bash
-EXPO_PUBLIC_SUPABASE_URL=...
-EXPO_PUBLIC_SUPABASE_ANON_KEY=...
-EXPO_PUBLIC_PROJECT_ID=...
+EXPO_PUBLIC_API_URL=http://localhost:3000
+EXPO_PUBLIC_PROJECT_ID=your_expo_project_id_here
 ```
 
-If any required `EXPO_PUBLIC_*` value is missing, the app now shows a blocking configuration screen instead of crashing at startup.
+Server `server/.env`:
 
-## Local Development
+```bash
+DATABASE_URL=postgresql://user:password@host:5432/railway
+PORT=3000
+```
+
+## Local Setup
+
+Install both packages:
 
 ```bash
 npm install
+npm --prefix server install
+```
+
+Or use:
+
+```bash
+npm run setup
+```
+
+## Local Development
+
+Start the API:
+
+```bash
+npm --prefix server run dev
+```
+
+Start the Expo app:
+
+```bash
 npm start
 ```
 
-Run on simulators:
+Simulators:
 
 ```bash
 npm run ios
 npm run android
 ```
 
-## Deployment Preflight
+## Validation
 
-Run this before every deploy:
+Useful commands:
+
+```bash
+npm run lint
+npm run typecheck:app
+npm run typecheck:server
+npm run build:server
+npm run test:app
+npm run test:server
+```
+
+Predeploy runs the full local validation stack:
 
 ```bash
 npm run predeploy
 ```
 
-This runs:
+## Database Setup
 
-1. `npm run lint`
-2. `npm run typecheck`
-
-## EAS Build / Release
-
-Build profiles are defined in `eas.json`:
-
-- `development` (internal dev-client)
-- `preview` (internal QA)
-- `production` (store-ready)
-
-Production releases are binary-only. Pushes to `main` trigger the iOS EAS workflow defined in `.eas/workflows/testflight-ios.yml`, which builds and submits a new TestFlight build.
-
-Example commands:
+Apply the current schema in Railway / Postgres using:
 
 ```bash
-eas build --platform android --profile preview
-eas build --platform ios --profile production
+server/schema.sql
 ```
 
-For production, do not use `eas update`. Ship changes through a new iOS binary via TestFlight / App Store.
+The schema includes:
 
-### Running from a non-git copy
+- users
+- groups
+- group_members
+- status_events
+- notification_logs
+- group_ruckus_notifications
 
-Preferred: run EAS commands from a proper git checkout.  
-Temporary troubleshooting fallback:
+## Release Flow
 
-```bash
-EAS_NO_VCS=1 eas build --platform android --profile preview
-```
+When code lands on `main`:
 
-## Supabase Setup
+1. Railway redeploys the backend
+2. Expo EAS runs `.eas/workflows/testflight-ios.yml`
+3. Expo builds the iOS production binary
+4. Expo submits that build to TestFlight
 
-1. Create a Supabase project.
-2. Run `supabase/schema.sql` in Supabase SQL Editor.
-3. Enable Phone auth in Supabase Authentication settings (if used).
-
-## Supabase Functions Deployment
-
-Canonical function directory: `supabase/functions`.
-
-Install and authenticate CLI:
-
-```bash
-npm install --global supabase
-supabase login
-supabase link --project-ref <your-project-ref>
-```
-
-Deploy functions:
-
-```bash
-supabase functions deploy send-status-notification
-supabase functions deploy cleanup-expired-statuses
-```
-
-## Operational Note: Paused Supabase Projects
-
-If the Supabase project is paused:
-
-- Expo/EAS builds can still succeed.
-- Runtime auth/database/function calls will fail until the project is resumed.
+Production does not use `eas update`.
 
 ## Troubleshooting
 
 | Symptom | Likely Cause | What to Check |
 |---|---|---|
-| Build fails before upload | Lint/typecheck/toolchain mismatch | `npm run predeploy`, Node version (`node -v`) |
-| Build succeeds but app fails on launch | Missing `EXPO_PUBLIC_*` vars | `.env` values and startup config screen |
-| App launches but backend features fail | Supabase paused/unreachable | Supabase dashboard status and API keys |
+| `npm run lint` fails before linting | stale root install | rerun `npm install` |
+| app typecheck passes but server build fails | `server/` dependencies missing | run `npm --prefix server install` |
+| app launches but API requests fail | missing `EXPO_PUBLIC_API_URL` or server not running | `.env` and API logs |
+| push registration succeeds but notifications do not arrive | Expo project or token issue | `EXPO_PUBLIC_PROJECT_ID`, Expo credentials, device token persistence |
 
 ## Notes
 
-- Full product behavior and scope: `product-spec.md`
-- Legacy folder `supabase/edge-functions` is kept for reference; deploy from `supabase/functions` only.
+- Product behavior and roadmap: `product-spec.md`
+- Release details: `docs/release.md`
+- Operational notes: `docs/ops.md`

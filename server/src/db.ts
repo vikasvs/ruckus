@@ -12,8 +12,8 @@ pool.on('error', (err) => {
 });
 
 // Test connection on startup
-pool.query('SELECT 1')
+void pool.query('SELECT 1')
   .then(() => console.log('Database connected successfully'))
-  .catch((err) => console.error('Database connection failed:', err.message));
+  .catch((err: Error) => console.error('Database connection failed:', err.message));
 
 export default pool;

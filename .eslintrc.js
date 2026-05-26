@@ -7,7 +7,9 @@ module.exports = {
   },
   ignorePatterns: [
     'dist/',
+    'coverage/',
     'node_modules/',
+    'server/dist/',
     'android/',
     'ios/',
     'supabase/functions/',

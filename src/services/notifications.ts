@@ -50,6 +50,14 @@ export async function registerForPushNotifications(userId: string): Promise<stri
       lightColor: '#9C27B0',
       sound: 'default',
     });
+
+    await Notifications.setNotificationChannelAsync('group-ruckus', {
+      name: 'Group Ruckus Notifications',
+      importance: Notifications.AndroidImportance.HIGH,
+      vibrationPattern: [0, 300, 150, 300],
+      lightColor: '#FB631B',
+      sound: 'default',
+    });
   }
 
   // Check if running on a physical device (Expo Go or standalone)

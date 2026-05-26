@@ -43,6 +43,14 @@ export function copyToClipboard(text: string): void {
   Clipboard.setString(text);
 }
 
+export function buildInviteMessage(groupName: string, inviteCode: string): string {
+  return [
+    `Join "${groupName}" on Ruckus.`,
+    `Invite code: ${inviteCode}`,
+    'Open the app and tap Join Group to use it.',
+  ].join('\n');
+}
+
 export function generateInviteCode(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let result = '';

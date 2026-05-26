@@ -52,6 +52,17 @@ CREATE TABLE IF NOT EXISTS notification_logs (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS group_ruckus_notifications (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    group_id UUID NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+    trigger_event_id UUID NOT NULL REFERENCES status_events(id) ON DELETE CASCADE,
+    triggered_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    window_started_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    window_ended_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    distinct_member_count INTEGER NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 CREATE INDEX IF NOT EXISTS idx_groups_invite_code ON groups(invite_code);
 CREATE INDEX IF NOT EXISTS idx_group_members_group_id ON group_members(group_id);
 CREATE INDEX IF NOT EXISTS idx_group_members_user_id ON group_members(user_id);
@@ -59,3 +70,5 @@ CREATE INDEX IF NOT EXISTS idx_group_members_current_status ON group_members(cur
 CREATE INDEX IF NOT EXISTS idx_status_events_group_id ON status_events(group_id);
 CREATE INDEX IF NOT EXISTS idx_status_events_user_id ON status_events(user_id);
 CREATE INDEX IF NOT EXISTS idx_status_events_created_at ON status_events(created_at);
+CREATE INDEX IF NOT EXISTS idx_group_ruckus_notifications_group_id ON group_ruckus_notifications(group_id);
+CREATE INDEX IF NOT EXISTS idx_group_ruckus_notifications_created_at ON group_ruckus_notifications(created_at);

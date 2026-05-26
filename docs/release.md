@@ -16,10 +16,17 @@ Production does not use `eas update` or over-the-air JS updates.
 ## What To Ship
 
 - Backend-only fix: merge to `main`
-- iOS app fix: merge to `main` and wait for the TestFlight build
+- App fix with JS-only changes: merge to `main` and wait for the TestFlight build
 - Native/config change: merge to `main` and wait for the TestFlight build
 
 ## Before Merging
+
+Install dependencies if needed:
+
+```bash
+npm install
+npm --prefix server install
+```
 
 Run:
 
