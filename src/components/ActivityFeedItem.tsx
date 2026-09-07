@@ -16,7 +16,7 @@ export default function ActivityFeedItem({ item, pinned = false }: ActivityFeedI
         <View style={styles.cardHeader}>
           <Text style={styles.cardTitle}>
             <Text style={styles.bold}>{item.first_name}</Text>
-            {item.source_event ? ` echoed ${item.source_event.first_name}'s ${item.source_event.status_type} up` : ` is ${item.status_type} up`}
+            {` is ${item.status_type} up`}
           </Text>
           <Text style={styles.cardMeta}>{formatRelativeTime(item.created_at)}</Text>
         </View>

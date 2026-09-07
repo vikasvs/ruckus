@@ -3,7 +3,7 @@ import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, RefreshContro
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
-import { GroupIdentity, GroupMemberWithUser, NotificationMode, TabParamList } from '@/types';
+import { GroupMemberWithUser, NotificationMode, TabParamList } from '@/types';
 import { useAuthStore } from '@/store/authStore';
 import { useGroupsStore } from '@/store/groupsStore';
 import { useStatusStore } from '@/store/statusStore';
@@ -27,7 +27,6 @@ export default function GroupMembersTab() {
   const [selectedMember, setSelectedMember] = useState<GroupMemberWithUser | null>(null);
   const [editingCrew, setEditingCrew] = useState(false);
   const [crewName, setCrewName] = useState('');
-  const [crewEmoji, setCrewEmoji] = useState('');
   const [crewSaving, setCrewSaving] = useState(false);
   const [crewError, setCrewError] = useState('');
 
@@ -80,7 +79,7 @@ export default function GroupMembersTab() {
     if (!crewName.trim()) { setCrewError('Add a crew name before saving.'); return; }
     setCrewSaving(true); setCrewError('');
     try {
-      await updateGroupIdentity(groupId, { name: crewName.trim(), emoji: crewEmoji.trim() });
+      await updateGroupIdentity(groupId, { name: crewName.trim() });
       setEditingCrew(false);
     } catch (err: any) { setCrewError(err.message || 'Could not save crew details.'); }
     finally { setCrewSaving(false); }
@@ -134,7 +133,7 @@ export default function GroupMembersTab() {
         {!!error && <Text style={styles.error} accessibilityRole="alert">{error}</Text>}
 
         {me?.is_admin && <TouchableOpacity style={styles.crewDetails} accessibilityRole="button" accessibilityLabel="Edit crew details" onPress={() => {
-          setCrewName(group?.name ?? ''); setCrewEmoji((group?.settings?.identity as GroupIdentity)?.emoji ?? ''); setCrewError(''); setEditingCrew(true);
+          setCrewName(group?.name ?? ''); setCrewError(''); setEditingCrew(true);
         }}><View style={styles.memberInfo}><Text style={styles.memberName}>Crew details</Text><Text style={styles.memberMeta}>{group?.name}</Text></View><Text style={styles.edit}>Edit</Text></TouchableOpacity>}
       </ScrollView>
 
@@ -145,7 +144,6 @@ export default function GroupMembersTab() {
             <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
               <View style={styles.header}><Text style={styles.title}>Crew details</Text><TouchableOpacity style={styles.done} onPress={() => setEditingCrew(false)} accessibilityRole="button"><Text style={styles.edit}>Done</Text></TouchableOpacity></View>
               <Text style={styles.label}>CREW NAME</Text><TextInput style={styles.input} value={crewName} onChangeText={setCrewName} accessibilityLabel="Crew name" autoCapitalize="words" />
-              <Text style={styles.label}>CREW EMOJI</Text><TextInput style={styles.input} value={crewEmoji} onChangeText={setCrewEmoji} accessibilityLabel="Crew emoji" />
               {!!crewError && <Text style={styles.error} accessibilityRole="alert">{crewError}</Text>}
               <TouchableOpacity style={styles.save} disabled={crewSaving} onPress={() => void saveCrew()} accessibilityRole="button"><Text style={styles.saveText}>{crewSaving ? 'Saving…' : 'Save crew details'}</Text></TouchableOpacity>
             </ScrollView>

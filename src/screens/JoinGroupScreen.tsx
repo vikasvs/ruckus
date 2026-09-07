@@ -128,24 +128,22 @@ export default function JoinGroupScreen() {
     }
   };
 
-  const previewHeat = (currentInvitePreview?.active_rucked_count ?? 0) + (currentInvitePreview?.active_ricked_count ?? 0);
-
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <View style={styles.content}>
         <Text style={styles.title}>Join a Group</Text>
         <Text style={styles.subtitle}>
-          Link preview and classic invite codes both work here.
+          Enter an invite code or follow a crew's invite link.
         </Text>
 
         {inviteToken && currentInvitePreview ? (
           <View style={styles.previewCard}>
             <Text style={styles.previewEyebrow}>
-              {currentInvitePreview.group.identity?.emoji ?? '⚡'} Invite preview
+              You're invited
             </Text>
             <Text style={styles.previewTitle}>{currentInvitePreview.group.name}</Text>
             <Text style={styles.previewBody}>
-              {currentInvitePreview.member_count} members, {previewHeat} live right now.
+              {currentInvitePreview.member_count} {currentInvitePreview.member_count === 1 ? 'member' : 'members'}
             </Text>
             <Text style={styles.previewCode}>Code: {currentInvitePreview.group.invite_code}</Text>
 

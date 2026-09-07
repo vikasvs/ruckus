@@ -1,19 +1,19 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { GroupIdentity, GroupWithMembership, NotificationMode } from '@/types';
-import { colors, palette, radii, spacing, typography } from '@/theme';
+import { GroupWithMembership, NotificationMode } from '@/types';
+import { colors, radii, spacing, typography } from '@/theme';
 
 interface GroupCardProps {
   group: GroupWithMembership;
   onPress: () => void;
 }
 
-function labelForMode(mode: NotificationMode) {
+function labelForMode(mode: NotificationMode, threshold: number) {
   switch (mode) {
     case 'ruckus_only':
       return 'Ruckus Only';
     case 'watch_threshold':
-      return 'Watching';
+      return `${threshold}+ people`;
     case 'muted':
       return 'Muted';
     default:
@@ -26,33 +26,19 @@ export default function GroupCard({ group, onPress }: GroupCardProps) {
   const rickedCount = group.active_ricked_count ?? 0;
   const totalLive = ruckedCount + rickedCount;
   const hasActiveStatus = totalLive > 0;
-  const identity = (group.settings?.identity ?? {}) as GroupIdentity;
-  const emoji = identity?.emoji ?? '⚡';
-  const tagline = identity?.tagline ?? 'Keep the crew in sync.';
   const mode = group.membership?.notification_mode ?? 'all_activity';
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.88}>
       <View style={styles.header}>
         <View style={styles.titleWrap}>
-          <Text style={styles.emoji}>{emoji}</Text>
           <View style={styles.titleCopy}>
             <Text style={styles.name} numberOfLines={1}>
               {group.name}
             </Text>
-            <Text style={styles.tagline} numberOfLines={1}>
-              {tagline}
-            </Text>
           </View>
         </View>
 
-        {group.streak ? (
-          <View style={[styles.pill, group.streak.at_risk && styles.pillWarning]}>
-            <Text style={styles.pillText}>
-              {group.streak.at_risk ? 'Streak At Risk' : `${group.streak.current}w streak`}
-            </Text>
-          </View>
-        ) : null}
       </View>
 
       <View style={styles.metaRow}>
@@ -60,7 +46,7 @@ export default function GroupCard({ group, onPress }: GroupCardProps) {
           {group.member_count} member{group.member_count !== 1 ? 's' : ''}
         </Text>
         <View style={styles.modeChip}>
-          <Text style={styles.modeChipText}>{labelForMode(mode)}</Text>
+          <Text style={styles.modeChipText}>{labelForMode(mode, group.membership?.watch_threshold ?? 3)}</Text>
         </View>
       </View>
 
@@ -108,33 +94,11 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     flex: 1,
   },
-  emoji: {
-    fontSize: 24,
-    marginTop: 2,
-  },
   titleCopy: {
     flex: 1,
   },
   name: {
     ...typography.subheading,
-    color: colors.textPrimary,
-  },
-  tagline: {
-    ...typography.caption,
-    color: colors.textMuted,
-    marginTop: 2,
-  },
-  pill: {
-    backgroundColor: colors.surfaceHover,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
-    borderRadius: 999,
-  },
-  pillWarning: {
-    backgroundColor: palette.feedback.info.bg,
-  },
-  pillText: {
-    ...typography.label,
     color: colors.textPrimary,
   },
   metaRow: {
