@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -16,27 +16,31 @@ import { useAuthStore } from '@/store/authStore';
 import { createUser } from '@/services/user';
 import { colors, typography, radii, spacing } from '@/theme';
 import RuckusWelcomeGate from '@/components/RuckusWelcomeGate';
+import AccountRecoverySheet from '@/components/AccountRecoverySheet';
 
 export default function AuthScreen() {
   const [firstName, setFirstName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [recovering, setRecovering] = useState(false);
+  const busy = useRef(false);
   const { setUser, fetchProfile } = useAuthStore();
 
   const handleContinue = async () => {
+    if (busy.current) return;
     if (!firstName.trim()) {
       Alert.alert('Error', 'Please enter your name');
       return;
     }
 
     try {
-      setIsLoading(true);
+      busy.current = true; setIsLoading(true);
       const user = await createUser(firstName.trim());
       await setUser(user.id);
       await fetchProfile();
     } catch (error: any) {
       Alert.alert('Error', error.message || 'An error occurred');
     } finally {
-      setIsLoading(false);
+      busy.current = false; setIsLoading(false);
     }
   };
 
@@ -78,15 +82,21 @@ export default function AuthScreen() {
                   <Text style={styles.buttonText}>Enter Ruckus</Text>
                 )}
               </TouchableOpacity>
+              <TouchableOpacity style={styles.recoveryLink} onPress={() => setRecovering(true)} disabled={isLoading} accessibilityRole="button">
+                <Text style={styles.recoveryText}>Already had an account? Recover it</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </RuckusWelcomeGate>
       </KeyboardAvoidingView>
+      {recovering && <AccountRecoverySheet onClose={() => setRecovering(false)} />}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  recoveryLink: { minHeight: 44, justifyContent: 'center', alignItems: 'center', marginTop: 8 },
+  recoveryText: { ...typography.caption, color: colors.textPrimary, textAlign: 'center' },
   container: {
     flex: 1,
     backgroundColor: colors.pageBg,

@@ -6,6 +6,15 @@ const getBaseUrl = (): string => {
   return url.replace(/\/$/, '');
 };
 
+export class ApiError extends Error {
+  readonly status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.status = status;
+    this.name = 'ApiError';
+  }
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const baseUrl = getBaseUrl();
   const res = await fetch(`${baseUrl}${path}`, {
@@ -18,7 +27,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error(body.error || `Request failed: ${res.status}`);
+    throw new ApiError(body.error || `Request failed: ${res.status}`, res.status);
   }
 
   if (res.status === 204) {
@@ -30,6 +39,6 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
 export const api = {
   get: <T>(path: string) => request<T>(path),
-  post: <T>(path: string, body: unknown) => request<T>(path, { method: 'POST', body: JSON.stringify(body) }),
+  post: <T>(path: string, body: unknown, options?: Pick<RequestInit, 'signal'>) => request<T>(path, { ...options, method: 'POST', body: JSON.stringify(body) }),
   patch: <T>(path: string, body: unknown) => request<T>(path, { method: 'PATCH', body: JSON.stringify(body) }),
 };

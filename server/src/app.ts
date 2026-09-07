@@ -4,6 +4,7 @@ import { createUsersRouter } from './routes/users';
 import { createGroupsRouter, loadInvitePreview } from './routes/groups';
 import { createStatusRouter } from './routes/status';
 import cors from 'cors';
+import { createRecoveryRouter } from './routes/recovery';
 
 function escapeHtml(value: string) {
   return value
@@ -204,6 +205,7 @@ export function createApp(deps: AppDependencies) {
     }
   });
 
+  app.use('/api/recovery', createRecoveryRouter(deps));
   app.use('/api/users', createUsersRouter(deps));
   app.use('/api/groups', createGroupsRouter(deps));
   app.use('/api/status', createStatusRouter(deps));

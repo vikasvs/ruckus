@@ -12,12 +12,12 @@ interface AuthState {
   isLoading: boolean;
   isInitialized: boolean;
   needsName: boolean;
+  initializationError: string | null;
 
   initialize: () => Promise<void>;
   setUser: (_userId: string) => Promise<void>;
   setProfile: (_profile: AppUser | null) => void;
   updateName: (_firstName: string) => Promise<void>;
-  signOut: () => Promise<void>;
   fetchProfile: () => Promise<void>;
 }
 
@@ -28,22 +28,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isLoading: true,
   isInitialized: false,
   needsName: false,
+  initializationError: null,
 
   initialize: async () => {
     try {
-      set({ isLoading: true });
+      set({ isLoading: true, initializationError: null });
 
       const storedUserId = await AsyncStorage.getItem(USER_ID_KEY);
 
       if (storedUserId) {
-        set({ session: { userId: storedUserId }, user: { id: storedUserId } });
+        set({ session: { userId: storedUserId }, user: { id: storedUserId }, needsName: false });
         await get().fetchProfile();
       } else {
         set({ needsName: true });
       }
     } catch (error) {
       console.error('Auth initialization error:', error);
-      set({ needsName: true });
+      // A storage/network failure must not send an existing account into new signup.
+      set({ initializationError: 'Could not read your saved account. Retry without creating a new account.' });
     } finally {
       set({ isLoading: false, isInitialized: true });
     }
@@ -51,7 +53,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   setUser: async (userId: string) => {
     await AsyncStorage.setItem(USER_ID_KEY, userId);
-    set({ session: { userId }, user: { id: userId } });
+    set({ session: { userId }, user: { id: userId }, profile: null, needsName: false });
   },
 
   setProfile: (profile) => {
@@ -79,20 +81,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     try {
       const profile = await getUserProfile(user.id);
+      if (get().user?.id !== user.id) return;
 
       if (profile) {
         set({ profile, needsName: false });
       } else {
         await AsyncStorage.removeItem(USER_ID_KEY);
-        set({ session: null, user: null, needsName: true });
+        set({ session: null, user: null, profile: null, needsName: true });
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
   },
 
-  signOut: async () => {
-    await AsyncStorage.removeItem(USER_ID_KEY);
-    set({ session: null, user: null, profile: null, needsName: true });
-  },
 }));

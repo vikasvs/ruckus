@@ -1,4 +1,4 @@
-import { api } from './api';
+import { api, ApiError } from './api';
 import { User } from '@/types';
 import { Platform } from 'react-native';
 
@@ -9,8 +9,9 @@ export const createUser = async (firstName: string, phone?: string): Promise<Use
 export const getUserProfile = async (userId: string): Promise<User | null> => {
   try {
     return await api.get<User>(`/api/users/${userId}`);
-  } catch {
-    return null;
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) return null;
+    throw error;
   }
 };
 

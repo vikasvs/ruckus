@@ -29,6 +29,7 @@ describe('authStore', () => {
       isLoading: true,
       isInitialized: false,
       needsName: false,
+      initializationError: null,
     });
   });
 
@@ -62,18 +63,33 @@ describe('authStore', () => {
     });
   });
 
-  it('clears the stored user on sign out', async () => {
-    await useAuthStore.getState().setUser('user-1');
+  it('preserves identity during profile network/server failures and recovers on retry', async () => {
+    await AsyncStorage.setItem('ruckus_user_id', 'user-1');
+    mockedGetUserProfile.mockRejectedValueOnce(new Error('Network unavailable')).mockResolvedValue(baseProfile);
+    await useAuthStore.getState().initialize();
+    expect(await AsyncStorage.getItem('ruckus_user_id')).toBe('user-1');
+    expect(useAuthStore.getState()).toMatchObject({ user: { id: 'user-1' }, needsName: false });
+    await useAuthStore.getState().fetchProfile();
+    expect(useAuthStore.getState().profile).toEqual(baseProfile);
+  });
 
-    await useAuthStore.getState().signOut();
+  it('blocks signup if local storage cannot be read', async () => {
+    jest.mocked(AsyncStorage.getItem).mockRejectedValueOnce(new Error('Storage unavailable'));
+    await useAuthStore.getState().initialize();
+    expect(useAuthStore.getState().initializationError).toBeTruthy();
+    expect(mockedGetUserProfile).not.toHaveBeenCalled();
+  });
 
+  it('only clears identity after a confirmed missing profile', async () => {
+    await AsyncStorage.setItem('ruckus_user_id', 'user-1');
+    mockedGetUserProfile.mockResolvedValueOnce(null);
+    await useAuthStore.getState().initialize();
     expect(await AsyncStorage.getItem('ruckus_user_id')).toBeNull();
-    expect(useAuthStore.getState()).toMatchObject({
-      session: null,
-      user: null,
-      profile: null,
-      needsName: true,
-    });
+    expect(useAuthStore.getState()).toMatchObject({ user: null, needsName: true });
+  });
+
+  it('has no destructive sign-out action while recovery is support-assisted', () => {
+    expect(useAuthStore.getState()).not.toHaveProperty('signOut');
   });
 
   it('persists an edited name and updates the local profile', async () => {

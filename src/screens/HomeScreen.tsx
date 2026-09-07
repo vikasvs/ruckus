@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -17,11 +17,13 @@ import { useGroupsStore } from '@/store/groupsStore';
 import GroupCard from '@/components/GroupCard';
 import Loading from '@/components/Loading';
 import EmptyState from '@/components/EmptyState';
+import AccountRecoverySheet from '@/components/AccountRecoverySheet';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
 export default function HomeScreen() {
   const navigation = useNavigation<HomeScreenNavigationProp>();
+  const [recovering, setRecovering] = useState(false);
   const { user } = useAuthStore();
   const { groups, isLoading, fetchGroups } = useGroupsStore();
 
@@ -74,6 +76,7 @@ export default function HomeScreen() {
         renderItem={renderGroupCard}
         keyExtractor={(item) => item.id}
         ListEmptyComponent={renderEmptyState}
+        ListFooterComponent={<TouchableOpacity style={styles.recoveryLink} accessibilityRole="button" onPress={() => setRecovering(true)}><Text style={styles.recoveryText}>Missing your old groups? Recover account</Text></TouchableOpacity>}
         contentContainerStyle={[
           styles.listContainer,
           groups.length === 0 && styles.emptyListContainer,
@@ -88,6 +91,7 @@ export default function HomeScreen() {
         }
       />
 
+      {recovering && <AccountRecoverySheet onClose={() => setRecovering(false)} />}
       <View style={styles.fab}>
         <TouchableOpacity
           style={styles.createButton}
@@ -108,6 +112,8 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  recoveryLink: { minHeight: 44, paddingVertical: 12, justifyContent: 'center', alignItems: 'center' },
+  recoveryText: { ...typography.caption, color: colors.textMuted, textAlign: 'center' },
   container: {
     flex: 1,
     backgroundColor: colors.pageBg,

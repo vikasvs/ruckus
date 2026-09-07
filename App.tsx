@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { View, ActivityIndicator, StyleSheet, Platform } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Platform, Text, TouchableOpacity } from 'react-native';
 import * as Linking from 'expo-linking';
 
 import AppNavigator from './src/navigation/AppNavigator';
@@ -23,7 +23,7 @@ function LoadingScreen() {
 }
 
 export default function App() {
-  const { initialize, isInitialized, isLoading, user } = useAuthStore();
+  const { initialize, isInitialized, isLoading, user, initializationError } = useAuthStore();
   const navigationRef = useRef<NavigationContainerRef<RootStackParamList>>(null);
   const notificationCleanupRef = useRef<(() => void) | null>(null);
   const pendingInviteTokenRef = useRef<string | null>(null);
@@ -146,9 +146,16 @@ export default function App() {
     );
   }
 
+  if (initializationError) {
+    return <SafeAreaProvider><View style={[styles.loadingContainer, { padding: 32 }]}>
+      <Text style={{ color: '#FFFFFF', fontSize: 17, textAlign: 'center' }} accessibilityRole="alert">{initializationError}</Text>
+      <TouchableOpacity style={{ minHeight: 48, minWidth: 80, marginTop: 24, justifyContent: 'center', alignItems: 'center' }} accessibilityRole="button" onPress={() => void initialize()}><Text style={{ color: '#FFFFFF', fontSize: 17 }}>Try again</Text></TouchableOpacity>
+    </View></SafeAreaProvider>;
+  }
+
   return (
     <SafeAreaProvider>
-      <NavigationContainer ref={navigationRef}>
+      <NavigationContainer key={user?.id ?? 'signed-out'} ref={navigationRef}>
         <AppNavigator />
         <StatusBar style="light" />
       </NavigationContainer>

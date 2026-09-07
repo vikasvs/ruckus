@@ -10,6 +10,17 @@ CREATE TABLE IF NOT EXISTS users (
     device_platform TEXT
 );
 
+-- Operator-issued account recovery only. Raw codes are never stored.
+CREATE TABLE IF NOT EXISTS account_recovery_codes (
+    code_hash TEXT PRIMARY KEY CHECK (length(code_hash) = 64),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    expires_at TIMESTAMPTZ NOT NULL,
+    redeemed_at TIMESTAMPTZ,
+    redemption_id UUID
+);
+CREATE INDEX IF NOT EXISTS account_recovery_user_idx ON account_recovery_codes(user_id);
+
 CREATE TABLE IF NOT EXISTS groups (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL CHECK (char_length(name) <= 100),
