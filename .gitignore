@@ -41,8 +41,10 @@ build/
 
 # Testing
 coverage/
+output/
+.playwright-cli/
+.playwright-mcp/
 
 # Supabase
 supabase/.branches/
 supabase/.temp/
-

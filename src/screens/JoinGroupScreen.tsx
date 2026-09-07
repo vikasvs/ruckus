@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -7,9 +7,10 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@/types';
 import { useAuthStore } from '@/store/authStore';
@@ -22,15 +23,39 @@ export default function JoinGroupScreen() {
   const [inviteCode, setInviteCode] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigation = useNavigation<JoinGroupScreenNavigationProp>();
+  const route = useRoute();
   const { user } = useAuthStore();
-  const { joinGroup } = useGroupsStore();
+  const {
+    currentInvitePreview,
+    fetchInvitePreview,
+    clearInvitePreview,
+    joinGroup,
+    joinGroupByInviteLink,
+  } = useGroupsStore();
+
+  const inviteToken = (route.params as RootStackParamList['JoinGroup'])?.inviteToken;
+
+  useEffect(() => {
+    if (!inviteToken) {
+      clearInvitePreview();
+      return;
+    }
+
+    fetchInvitePreview(inviteToken).catch((error: any) => {
+      Alert.alert('Invite unavailable', error.message || 'That invite link has expired.');
+    });
+
+    return () => {
+      clearInvitePreview();
+    };
+  }, [inviteToken]);
 
   const formatInviteCode = (text: string) => {
     const cleaned = text.replace(/[^A-Za-z0-9]/g, '');
     return cleaned.substring(0, 8).toUpperCase();
   };
 
-  const handleJoinGroup = async () => {
+  const handleJoinViaCode = async () => {
     if (!inviteCode.trim()) {
       Alert.alert('Error', 'Please enter an invite code');
       return;
@@ -49,6 +74,10 @@ export default function JoinGroupScreen() {
     try {
       setIsSubmitting(true);
       const { group } = await joinGroup(inviteCode, user.id);
+      if (Platform.OS === 'web') {
+        navigation.replace('Group', { groupId: group.id });
+        return;
+      }
 
       Alert.alert('Success', `You've joined ${group.name}!`, [
         {
@@ -73,40 +102,92 @@ export default function JoinGroupScreen() {
     }
   };
 
+  const handleJoinViaLink = async () => {
+    if (!inviteToken || !user?.id) {
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const { group } = await joinGroupByInviteLink(inviteToken, user.id);
+      if (Platform.OS === 'web') {
+        navigation.replace('Group', { groupId: group.id });
+        return;
+      }
+
+      Alert.alert('Success', `You've joined ${group.name}!`, [
+        {
+          text: 'OK',
+          onPress: () => navigation.replace('Group', { groupId: group.id }),
+        },
+      ]);
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to join group');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const previewHeat = (currentInvitePreview?.active_rucked_count ?? 0) + (currentInvitePreview?.active_ricked_count ?? 0);
+
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <View style={styles.content}>
         <Text style={styles.title}>Join a Group</Text>
         <Text style={styles.subtitle}>
-          Enter the 8-character invite code from your friend
+          Link preview and classic invite codes both work here.
         </Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="ABCD1234"
-          placeholderTextColor={colors.textPlaceholder}
-          value={inviteCode}
-          onChangeText={(text) => setInviteCode(formatInviteCode(text))}
-          maxLength={8}
-          autoCapitalize="characters"
-          editable={!isSubmitting}
-        />
+        {inviteToken && currentInvitePreview ? (
+          <View style={styles.previewCard}>
+            <Text style={styles.previewEyebrow}>
+              {currentInvitePreview.group.identity?.emoji ?? '⚡'} Invite preview
+            </Text>
+            <Text style={styles.previewTitle}>{currentInvitePreview.group.name}</Text>
+            <Text style={styles.previewBody}>
+              {currentInvitePreview.member_count} members, {previewHeat} live right now.
+            </Text>
+            <Text style={styles.previewCode}>Code: {currentInvitePreview.group.invite_code}</Text>
 
-        <Text style={styles.helperText}>
-          Codes are not case-sensitive
-        </Text>
+            <TouchableOpacity
+              style={[styles.button, isSubmitting && styles.buttonDisabled]}
+              onPress={handleJoinViaLink}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <ActivityIndicator color={colors.textInverse} />
+              ) : (
+                <Text style={styles.buttonText}>Join This Crew</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        ) : null}
 
-        <TouchableOpacity
-          style={[styles.button, isSubmitting && styles.buttonDisabled]}
-          onPress={handleJoinGroup}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? (
-            <ActivityIndicator color={colors.textInverse} />
-          ) : (
-            <Text style={styles.buttonText}>Join Group</Text>
-          )}
-        </TouchableOpacity>
+        <View style={styles.codeSection}>
+          <Text style={styles.sectionLabel}>Join with code</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="ABCD1234"
+            placeholderTextColor={colors.textPlaceholder}
+            value={inviteCode}
+            onChangeText={(text) => setInviteCode(formatInviteCode(text))}
+            maxLength={8}
+            autoCapitalize="characters"
+            editable={!isSubmitting}
+          />
+
+          <Text style={styles.helperText}>
+            Codes are not case-sensitive
+          </Text>
+
+          <TouchableOpacity
+            style={[styles.secondaryButton, isSubmitting && styles.buttonDisabled]}
+            onPress={handleJoinViaCode}
+            disabled={isSubmitting}
+          >
+            <Text style={styles.secondaryButtonText}>Use Invite Code</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -121,7 +202,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: spacing.pagePadding,
     justifyContent: 'center',
-    maxWidth: 400,
+    maxWidth: 420,
     width: '100%',
     alignSelf: 'center',
   },
@@ -138,8 +219,50 @@ const styles = StyleSheet.create({
     marginBottom: spacing['2xl'],
     lineHeight: 22,
   },
-  input: {
+  previewCard: {
     backgroundColor: colors.surface,
+    borderRadius: radii.lg,
+    padding: spacing.xl,
+    borderWidth: 1,
+    borderColor: colors.borderDefault,
+    marginBottom: spacing.xl,
+  },
+  previewEyebrow: {
+    ...typography.label,
+    color: colors.textMuted,
+    marginBottom: spacing.sm,
+  },
+  previewTitle: {
+    ...typography.subheading,
+    color: colors.textPrimary,
+    marginBottom: spacing.xs,
+  },
+  previewBody: {
+    ...typography.body,
+    color: colors.textMuted,
+    marginBottom: spacing.md,
+  },
+  previewCode: {
+    ...typography.caption,
+    color: colors.textPrimary,
+    fontFamily: typography.monoFamily,
+    letterSpacing: 2,
+    marginBottom: spacing.lg,
+  },
+  codeSection: {
+    backgroundColor: colors.surface,
+    borderRadius: radii.lg,
+    padding: spacing.xl,
+    borderWidth: 1,
+    borderColor: colors.borderDefault,
+  },
+  sectionLabel: {
+    ...typography.label,
+    color: colors.textMuted,
+    marginBottom: spacing.sm,
+  },
+  input: {
+    backgroundColor: colors.surfaceHover,
     color: colors.textPrimary,
     fontSize: 20,
     fontWeight: '600',
@@ -156,10 +279,16 @@ const styles = StyleSheet.create({
     color: colors.textLabel,
     ...typography.small,
     textAlign: 'center',
-    marginBottom: spacing.xl,
+    marginBottom: spacing.lg,
   },
   button: {
     backgroundColor: colors.accentActive,
+    paddingVertical: spacing.md,
+    borderRadius: radii.sm,
+    alignItems: 'center',
+  },
+  secondaryButton: {
+    backgroundColor: colors.surfaceHover,
     paddingVertical: spacing.md,
     borderRadius: radii.sm,
     alignItems: 'center',
@@ -169,6 +298,10 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: colors.textInverse,
+    ...typography.subheading,
+  },
+  secondaryButtonText: {
+    color: colors.textPrimary,
     ...typography.subheading,
   },
 });

@@ -6,7 +6,6 @@ import {
   StyleSheet,
   FlatList,
   RefreshControl,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -18,7 +17,6 @@ import { useGroupsStore } from '@/store/groupsStore';
 import GroupCard from '@/components/GroupCard';
 import Loading from '@/components/Loading';
 import EmptyState from '@/components/EmptyState';
-import { buildInviteMessage, copyToClipboard } from '@/utils';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -47,18 +45,10 @@ export default function HomeScreen() {
     navigation.navigate('Group', { groupId: group.id });
   };
 
-  const handleSharePress = (group: GroupWithMembership) => {
-    if (group.invite_code) {
-      copyToClipboard(buildInviteMessage(group.name, group.invite_code));
-      Alert.alert('Invite copied!', `Send this to your crew to join ${group.name}.`);
-    }
-  };
-
   const renderGroupCard = ({ item }: { item: GroupWithMembership }) => (
     <GroupCard
       group={item}
       onPress={() => handleGroupPress(item)}
-      onSharePress={() => handleSharePress(item)}
     />
   );
 

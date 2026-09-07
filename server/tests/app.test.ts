@@ -11,7 +11,7 @@ function createTestApp(responses: Array<{ rows: Record<string, unknown>[] }>) {
   return createApp({
     pool,
     pushSender,
-    idGenerator: createIdGenerator('user-1', 'group-1', 'member-1', 'member-2'),
+    idGenerator: createIdGenerator('user-1', 'group-1', 'member-1', 'invite-1', 'member-2'),
     now: () => new Date('2026-05-25T12:05:00.000Z'),
   });
 }
@@ -22,6 +22,32 @@ test('GET /health returns ok', async () => {
 
   assert.equal(response.status, 200);
   assert.deepEqual(response.body, { status: 'ok' });
+});
+
+test('member history scopes expired posts to the selected member and paginates', async () => {
+  const { pool, calls } = createQueuedPool([{ rows: [{
+    id: 'event-older', user_id: 'member-1', group_id: 'group-1', first_name: 'Maya',
+    status_type: 'ricked', created_at: '2026-01-01T12:00:00Z', expires_at: '2026-01-01T18:00:00Z',
+  }] }]);
+  const { pushSender } = createMockPushSender();
+  const app = createApp({ pool, pushSender, idGenerator: createIdGenerator(), now: () => new Date('2026-09-06') });
+  const response = await request(app).get('/api/status/activity/group-1?userId=member-1&limit=30&offset=30');
+  assert.equal(response.status, 200);
+  assert.equal(response.body[0].status_type, 'ricked');
+  assert.equal(response.body[0].users.first_name, 'Maya');
+  assert.deepEqual(calls[0].params, ['group-1', 30, 'member-1', 30]);
+  assert.match(calls[0].text, /se.user_id = \$3::uuid/);
+  assert.match(calls[0].text, /ORDER BY se.created_at DESC, se.id DESC/);
+  assert.doesNotMatch(calls[0].text, /expires_at\s*[><]/);
+});
+
+test('member history bounds pagination and retains the group-wide endpoint', async () => {
+  const { pool, calls } = createQueuedPool([{ rows: [] }]);
+  const { pushSender } = createMockPushSender();
+  const app = createApp({ pool, pushSender, idGenerator: createIdGenerator(), now: () => new Date() });
+  const response = await request(app).get('/api/status/activity/group-1?limit=999&offset=-5');
+  assert.equal(response.status, 200);
+  assert.deepEqual(calls[0].params, ['group-1', 100, null, 0]);
 });
 
 test('POST /api/users creates a user', async () => {
@@ -48,7 +74,39 @@ test('POST /api/users creates a user', async () => {
   assert.equal(response.body.first_name, 'Casey');
 });
 
-test('POST /api/groups creates a group and creator membership', async () => {
+test('PATCH /api/users/:id persists an edited name', async () => {
+  const { pool, calls } = createQueuedPool([
+    {
+      rows: [{
+        id: 'user-1',
+        first_name: 'Vikas',
+        phone: null,
+        created_at: '2026-05-25T12:00:00.000Z',
+        last_active: '2026-05-25T12:06:00.000Z',
+        push_token: null,
+        device_platform: null,
+      }],
+    },
+  ]);
+  const { pushSender } = createMockPushSender();
+  const app = createApp({
+    pool,
+    pushSender,
+    idGenerator: createIdGenerator(),
+    now: () => new Date('2026-05-25T12:06:00.000Z'),
+  });
+
+  const response = await request(app)
+    .patch('/api/users/user-1')
+    .send({ first_name: '  Vikas  ' });
+
+  assert.equal(response.status, 200);
+  assert.equal(response.body.first_name, 'Vikas');
+  assert.deepEqual(calls[0].params, ['Vikas', undefined, undefined, 'user-1']);
+  assert.match(calls[0].text, /UPDATE users/);
+});
+
+test('POST /api/groups creates a group, membership, and invite link', async () => {
   const app = createTestApp([
     { rows: [] },
     {
@@ -59,20 +117,31 @@ test('POST /api/groups creates a group and creator membership', async () => {
         created_by: 'user-1',
         created_at: '2026-05-25T12:00:00.000Z',
         is_active: true,
-        settings: {},
+        settings: { identity: { timezone: 'UTC' } },
         metadata: {},
       }],
     },
     { rows: [] },
     { rows: [] },
+    {
+      rows: [{
+        id: 'invite-1',
+        group_id: 'group-1',
+        token: 'share-token',
+        is_active: true,
+        created_at: '2026-05-25T12:00:00.000Z',
+      }],
+    },
+    { rows: [] },
   ]);
 
   const response = await request(app)
     .post('/api/groups')
-    .send({ name: 'Friday Crew', userId: 'user-1' });
+    .send({ name: 'Friday Crew', userId: 'user-1', timezone: 'UTC' });
 
   assert.equal(response.status, 201);
   assert.equal(response.body.name, 'Friday Crew');
+  assert.equal(response.body.invite_link.token, 'share-token');
 });
 
 test('POST /api/groups/join joins a valid group', async () => {
@@ -99,6 +168,9 @@ test('POST /api/groups/join joins a valid group', async () => {
         joined_at: '2026-05-25T12:01:00.000Z',
         is_admin: false,
         notifications_enabled: true,
+        notification_mode: 'all_activity',
+        watch_threshold: null,
+        watch_until: null,
         current_status: null,
         status_updated_at: null,
       }],

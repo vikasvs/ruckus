@@ -6,6 +6,7 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
+    "migrate": "node scripts/migrate.cjs",
     "typecheck": "tsc --noEmit",
     "test": "node --test --import tsx tests/**/*.test.ts"
   },

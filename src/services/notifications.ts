@@ -112,6 +112,10 @@ export async function registerForPushNotifications(userId: string): Promise<stri
 export function setupNotificationHandler(
   onNotificationTap: (_groupId: string) => void
 ): () => void {
+  if (Platform.OS === 'web') {
+    return () => {};
+  }
+
   // Handle notification received while app is foregrounded
   const foregroundSubscription = Notifications.addNotificationReceivedListener((notification) => {
     console.log('Notification received in foreground:', notification);
@@ -136,6 +140,10 @@ export function setupNotificationHandler(
 }
 
 export async function getLastNotificationResponse(): Promise<string | null> {
+  if (Platform.OS === 'web') {
+    return null;
+  }
+
   const response = await Notifications.getLastNotificationResponseAsync();
   if (response?.notification.request.content.data?.groupId) {
     return response.notification.request.content.data.groupId as string;

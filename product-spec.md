@@ -123,23 +123,23 @@ Ruckus is a dead-simple vibe broadcast app that lets you tell your crew how you'
 ## 4. New Feature Scope: "The Group Is in a Ruckus"
 
 ### Goal
-When a burst of activity hits a group, send a bigger, higher-signal summary notification so the moment feels collective instead of like three isolated status pushes.
+When a second person joins a burst of activity, send a bigger, higher-signal summary notification so the moment immediately feels collective.
 
 ### Trigger Rule
-- Trigger when 3 or more distinct group members post either `rucked` or `ricked` statuses inside a rolling 5-minute window in the same group
+- Trigger when 2 or more distinct group members post either `rucked` or `ricked` statuses inside a rolling 5-minute window in the same group
 - Mixed-status bursts count; the feature is about group energy, not only same-status matching
 - Count each member once inside the active window for threshold purposes
 
 ### Notification Behavior
 - Send a summary push to group members who have notifications enabled
 - Default title: `[Group Name] is in a Ruckus`
-- Default body: `3 people lit up in the last 5 minutes`
+- Default body: `2 people lit up in the last 5 minutes`
 - If all qualifying statuses are the same type, the body can become more specific, for example:
-  - `3 people are rucked up right now`
-  - `3 people are ricked up right now`
+  - `2 people are rucked up right now`
+  - `2 people are ricked up right now`
 
 ### Delivery Guardrails
-- Fire only when the group crosses the threshold, not on every event after the third
+- Fire only when the group crosses the threshold, not on every event after the second
 - Suppress repeat summary pushes for the same burst until the rolling window drops below threshold and crosses it again
 - Keep the existing direct per-status pushes; the summary notification is additive, not a replacement
 - Default behavior should exclude the user who triggered the threshold-crossing event, matching current direct-push behavior
@@ -150,7 +150,7 @@ When a burst of activity hits a group, send a bigger, higher-signal summary noti
 - Adding a synthetic activity-feed row for `Group is in a Ruckus` is optional follow-up work, not a launch requirement
 
 ### Success Criteria
-- A burst of 3+ distinct members inside 5 minutes produces exactly one summary push for that burst
+- A burst of 2+ distinct members inside 5 minutes produces exactly one summary push for that burst
 - Members still receive the existing per-status pushes
 - A later burst can retrigger after the group falls below threshold and crosses it again
 - Muted members do not receive the summary push

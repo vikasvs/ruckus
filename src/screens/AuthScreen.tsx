@@ -10,10 +10,12 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
+import { BlurView } from 'expo-blur';
 import { useAuthStore } from '@/store/authStore';
 import { createUser } from '@/services/user';
 import { colors, typography, radii, spacing } from '@/theme';
+import RuckusWelcomeGate from '@/components/RuckusWelcomeGate';
 
 export default function AuthScreen() {
   const [firstName, setFirstName] = useState('');
@@ -39,39 +41,48 @@ export default function AuthScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
+      <StatusBar style="dark" />
       <KeyboardAvoidingView
         style={styles.keyboardAvoid}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <View style={styles.content}>
-          <Text style={styles.title}>Ruckus</Text>
-          <Text style={styles.subtitle}>What should we call you?</Text>
+        <RuckusWelcomeGate>
+          <View style={styles.glassForm}>
+            <BlurView intensity={72} tint="light" style={StyleSheet.absoluteFill} />
+            <View style={styles.formContent}>
+              <Text style={styles.formLabel}>WHAT SHOULD WE CALL YOU?</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="First name"
+                placeholderTextColor={colors.textPlaceholder}
+                value={firstName}
+                onChangeText={setFirstName}
+                autoCapitalize="words"
+                autoCorrect={false}
+                returnKeyType="go"
+                onSubmitEditing={handleContinue}
+                accessibilityLabel="First name"
+              />
 
-          <TextInput
-            style={styles.input}
-            placeholder="First name"
-            placeholderTextColor={colors.textPlaceholder}
-            value={firstName}
-            onChangeText={setFirstName}
-            autoFocus
-            autoCapitalize="words"
-          />
-
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleContinue}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator color={colors.textInverse} />
-            ) : (
-              <Text style={styles.buttonText}>Let's Go</Text>
-            )}
-          </TouchableOpacity>
-        </View>
+              <TouchableOpacity
+                style={[styles.button, isLoading && styles.buttonDisabled]}
+                onPress={handleContinue}
+                disabled={isLoading}
+                accessibilityRole="button"
+                accessibilityLabel="Enter Ruckus"
+              >
+                {isLoading ? (
+                  <ActivityIndicator color={colors.textInverse} />
+                ) : (
+                  <Text style={styles.buttonText}>Enter Ruckus</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </RuckusWelcomeGate>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -83,45 +94,48 @@ const styles = StyleSheet.create({
   keyboardAvoid: {
     flex: 1,
   },
-  content: {
-    flex: 1,
-    paddingHorizontal: spacing.pagePadding,
-    justifyContent: 'center',
-    maxWidth: 400,
-    width: '100%',
-    alignSelf: 'center',
+  glassForm: {
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.82)',
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.58)',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.12,
+    shadowRadius: 24,
+    elevation: 8,
   },
-  title: {
-    ...typography.display,
-    color: colors.textPrimary,
+  formContent: {
+    padding: spacing.lg,
+  },
+  formLabel: {
+    ...typography.label,
+    color: colors.textSecondary,
     marginBottom: spacing.sm,
-    textAlign: 'center',
-  },
-  subtitle: {
-    ...typography.body,
-    color: colors.textMuted,
-    marginBottom: spacing['2xl'],
-    textAlign: 'center',
   },
   input: {
     width: '100%',
-    height: 48,
+    minHeight: 48,
     borderWidth: 1,
     borderColor: colors.borderDefault,
-    borderRadius: radii.md,
+    borderRadius: radii.lg,
     paddingHorizontal: spacing.lg,
     ...typography.body,
-    marginBottom: spacing.lg,
-    backgroundColor: colors.surface,
+    marginBottom: spacing.md,
+    backgroundColor: 'rgba(255,255,255,0.9)',
     color: colors.textPrimary,
   },
   button: {
     width: '100%',
-    height: 48,
-    backgroundColor: colors.accentActive,
-    borderRadius: radii.sm,
+    minHeight: 48,
+    backgroundColor: colors.charcoalBg,
+    borderRadius: radii.lg,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  buttonDisabled: {
+    opacity: 0.55,
   },
   buttonText: {
     color: colors.textInverse,

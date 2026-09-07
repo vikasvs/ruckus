@@ -1,12 +1,14 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getUserProfile } from '@/services/user';
+import { getUserProfile, updateUserProfile } from '@/services/user';
 import { useAuthStore } from '@/store/authStore';
 
 jest.mock('@/services/user', () => ({
   getUserProfile: jest.fn(),
+  updateUserProfile: jest.fn(),
 }));
 
 const mockedGetUserProfile = jest.mocked(getUserProfile);
+const mockedUpdateUserProfile = jest.mocked(updateUserProfile);
 
 const baseProfile = {
   id: 'user-1',
@@ -72,5 +74,16 @@ describe('authStore', () => {
       profile: null,
       needsName: true,
     });
+  });
+
+  it('persists an edited name and updates the local profile', async () => {
+    await useAuthStore.getState().setUser('user-1');
+    useAuthStore.setState({ profile: baseProfile });
+    mockedUpdateUserProfile.mockResolvedValue({ ...baseProfile, first_name: 'Vikas' });
+
+    await useAuthStore.getState().updateName('  Vikas  ');
+
+    expect(mockedUpdateUserProfile).toHaveBeenCalledWith('user-1', { first_name: 'Vikas' });
+    expect(useAuthStore.getState().profile?.first_name).toBe('Vikas');
   });
 });

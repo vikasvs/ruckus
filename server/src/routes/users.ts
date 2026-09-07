@@ -51,6 +51,13 @@ export function createUsersRouter({ pool, idGenerator }: Pick<AppDependencies, '
   // Update user
   router.patch('/:id', async (req: Request, res: Response) => {
     const { first_name, push_token, device_platform } = req.body;
+    const nextFirstName = typeof first_name === 'string' ? first_name.trim() : undefined;
+
+    if (first_name !== undefined && !nextFirstName) {
+      res.status(400).json({ error: 'first_name cannot be empty' });
+      return;
+    }
+
     try {
       const result = await pool.query<UserRow>(
         `UPDATE users SET
@@ -59,7 +66,7 @@ export function createUsersRouter({ pool, idGenerator }: Pick<AppDependencies, '
           device_platform = COALESCE($3, device_platform),
           last_active = NOW()
         WHERE id = $4 RETURNING *`,
-        [first_name, push_token, device_platform, req.params.id]
+        [nextFirstName, push_token, device_platform, req.params.id]
       );
       if (result.rows.length === 0) {
         res.status(404).json({ error: 'User not found' });

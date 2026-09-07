@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User as AppUser } from '@/types';
-import { getUserProfile } from '@/services/user';
+import { getUserProfile, updateUserProfile } from '@/services/user';
 
 const USER_ID_KEY = 'ruckus_user_id';
 
@@ -16,6 +16,7 @@ interface AuthState {
   initialize: () => Promise<void>;
   setUser: (_userId: string) => Promise<void>;
   setProfile: (_profile: AppUser | null) => void;
+  updateName: (_firstName: string) => Promise<void>;
   signOut: () => Promise<void>;
   fetchProfile: () => Promise<void>;
 }
@@ -55,6 +56,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   setProfile: (profile) => {
     set({ profile });
+  },
+
+  updateName: async (firstName) => {
+    const { user } = get();
+    const trimmedName = firstName.trim();
+
+    if (!user) {
+      throw new Error('You need to be signed in to update your name.');
+    }
+    if (!trimmedName) {
+      throw new Error('Name cannot be empty.');
+    }
+
+    const profile = await updateUserProfile(user.id, { first_name: trimmedName });
+    set({ profile, needsName: false });
   },
 
   fetchProfile: async () => {

@@ -24,7 +24,7 @@ export interface PushMessage {
   sound: 'default';
   title: string;
   body: string;
-  data: { groupId: string };
+  data: Record<string, unknown> & { groupId: string };
   channelId: string;
 }
 

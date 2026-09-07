@@ -34,6 +34,8 @@ export default function StatusButton({
       onPress={onPress}
       disabled={isDisabled}
       activeOpacity={0.8}
+      accessibilityRole="button"
+      accessibilityState={{ selected: isActive, disabled: isDisabled }}
     >
       <Text style={styles.buttonText}>
         {type === 'rucked' ? 'Rucked Up' : 'Ricked Up'}
@@ -77,7 +79,8 @@ const styles = StyleSheet.create({
   buttonText: {
     color: colors.textInverse,
     ...typography.subheading,
-    fontWeight: '600',
+    fontSize: 18,
+    fontWeight: '700',
   },
   cooldownOverlay: {
     position: 'absolute',

@@ -21,6 +21,14 @@ Production does not use `eas update` or over-the-air JS updates.
 
 ## Before Merging
 
+When `server/schema.sql` changes, apply its additive, transactional migration to
+the verified target database **before** pushing the matching backend release:
+`npm --prefix server run migrate` with `DATABASE_URL` supplied securely by the
+deployment environment. This preserves existing data and mute preferences.
+
+Use the EAS production environment when building. Never package `.env.local` or
+the local demo database; production uses the hosted Railway API.
+
 Install dependencies if needed:
 
 ```bash

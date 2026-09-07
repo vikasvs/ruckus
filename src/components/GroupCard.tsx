@@ -1,42 +1,70 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { GroupWithMembership } from '@/types';
+import { GroupIdentity, GroupWithMembership, NotificationMode } from '@/types';
 import { colors, palette, radii, spacing, typography } from '@/theme';
 
 interface GroupCardProps {
   group: GroupWithMembership;
   onPress: () => void;
-  onSharePress?: () => void;
 }
 
-export default function GroupCard({ group, onPress, onSharePress }: GroupCardProps) {
+function labelForMode(mode: NotificationMode) {
+  switch (mode) {
+    case 'ruckus_only':
+      return 'Ruckus Only';
+    case 'watch_threshold':
+      return 'Watching';
+    case 'muted':
+      return 'Muted';
+    default:
+      return 'All Activity';
+  }
+}
+
+export default function GroupCard({ group, onPress }: GroupCardProps) {
   const ruckedCount = group.active_rucked_count ?? 0;
   const rickedCount = group.active_ricked_count ?? 0;
-  const hasActiveStatus = ruckedCount > 0 || rickedCount > 0;
+  const totalLive = ruckedCount + rickedCount;
+  const hasActiveStatus = totalLive > 0;
+  const identity = (group.settings?.identity ?? {}) as GroupIdentity;
+  const emoji = identity?.emoji ?? '⚡';
+  const tagline = identity?.tagline ?? 'Keep the crew in sync.';
+  const mode = group.membership?.notification_mode ?? 'all_activity';
 
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
+    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.88}>
       <View style={styles.header}>
-        <Text style={styles.name} numberOfLines={1}>
-          {group.name}
-        </Text>
-        {onSharePress && (
-          <TouchableOpacity
-            style={styles.shareButton}
-            onPress={(e) => { e.stopPropagation?.(); onSharePress(); }}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            <Text style={styles.shareIcon}>↗</Text>
-          </TouchableOpacity>
-        )}
-        {hasActiveStatus && <View style={styles.activeDot} />}
+        <View style={styles.titleWrap}>
+          <Text style={styles.emoji}>{emoji}</Text>
+          <View style={styles.titleCopy}>
+            <Text style={styles.name} numberOfLines={1}>
+              {group.name}
+            </Text>
+            <Text style={styles.tagline} numberOfLines={1}>
+              {tagline}
+            </Text>
+          </View>
+        </View>
+
+        {group.streak ? (
+          <View style={[styles.pill, group.streak.at_risk && styles.pillWarning]}>
+            <Text style={styles.pillText}>
+              {group.streak.at_risk ? 'Streak At Risk' : `${group.streak.current}w streak`}
+            </Text>
+          </View>
+        ) : null}
       </View>
 
-      <Text style={styles.memberCount}>
-        {group.member_count} member{group.member_count !== 1 ? 's' : ''}
-      </Text>
+      <View style={styles.metaRow}>
+        <Text style={styles.memberCount}>
+          {group.member_count} member{group.member_count !== 1 ? 's' : ''}
+        </Text>
+        <View style={styles.modeChip}>
+          <Text style={styles.modeChipText}>{labelForMode(mode)}</Text>
+        </View>
+      </View>
 
-      {hasActiveStatus && (
+      {hasActiveStatus ? (
         <View style={styles.statusContainer}>
           {ruckedCount > 0 && (
             <View style={[styles.statusBadge, styles.ruckedBadge]}>
@@ -53,6 +81,8 @@ export default function GroupCard({ group, onPress, onSharePress }: GroupCardPro
             </View>
           )}
         </View>
+      ) : (
+        <Text style={styles.quietText}>Quiet right now</Text>
       )}
     </TouchableOpacity>
   );
@@ -61,46 +91,76 @@ export default function GroupCard({ group, onPress, onSharePress }: GroupCardPro
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
-    borderRadius: radii.md,
+    borderRadius: radii.lg,
     padding: spacing.cardPadding,
-    marginBottom: spacing.sm,
+    marginBottom: spacing.md,
     borderWidth: 1,
     borderColor: colors.borderDefault,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.accentActive,
   },
   header: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.xs,
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+  },
+  titleWrap: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    flex: 1,
+  },
+  emoji: {
+    fontSize: 24,
+    marginTop: 2,
+  },
+  titleCopy: {
+    flex: 1,
   },
   name: {
     ...typography.subheading,
     color: colors.textPrimary,
-    flex: 1,
   },
-  shareButton: {
+  tagline: {
+    ...typography.caption,
+    color: colors.textMuted,
+    marginTop: 2,
+  },
+  pill: {
     backgroundColor: colors.surfaceHover,
     paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: radii.sm,
-    marginLeft: spacing.sm,
+    paddingVertical: 4,
+    borderRadius: 999,
   },
-  shareIcon: {
-    color: colors.textMuted,
-    ...typography.caption,
+  pillWarning: {
+    backgroundColor: palette.feedback.info.bg,
   },
-  activeDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: palette.feedback.success.base,
-    marginLeft: spacing.sm,
+  pillText: {
+    ...typography.label,
+    color: colors.textPrimary,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: spacing.md,
+    marginBottom: spacing.md,
   },
   memberCount: {
     ...typography.caption,
     color: colors.textMuted,
-    marginBottom: spacing.sm,
+  },
+  modeChip: {
+    backgroundColor: colors.surfaceHover,
+    borderRadius: 999,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+  },
+  modeChipText: {
+    ...typography.label,
+    color: colors.textMuted,
+  },
+  quietText: {
+    ...typography.caption,
+    color: colors.textMuted,
   },
   statusContainer: {
     flexDirection: 'row',
@@ -108,7 +168,7 @@ const styles = StyleSheet.create({
   },
   statusBadge: {
     paddingHorizontal: spacing.sm,
-    paddingVertical: 3,
+    paddingVertical: 4,
     borderRadius: radii.sm,
   },
   ruckedBadge: {

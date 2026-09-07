@@ -30,9 +30,9 @@ export const palette = {
 
   status: {
     rucked: {
-      base: '#27272A',      // Parallel charcoal
-      bg: '#F4F4F5',
-      text: '#27272A',
+      base: '#FF5C00',      // Ruckus orange
+      bg: '#FFF4ED',
+      text: '#8B3209',
     },
     ricked: {
       base: '#3B82F6',      // Parallel blue
