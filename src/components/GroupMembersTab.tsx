@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, RefreshControl, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, RefreshControl, ScrollView, Share, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
@@ -7,7 +7,7 @@ import { GroupMemberWithUser, NotificationMode, TabParamList } from '@/types';
 import { useAuthStore } from '@/store/authStore';
 import { useGroupsStore } from '@/store/groupsStore';
 import { useStatusStore } from '@/store/statusStore';
-import { colors, getStatusBg, getStatusText, typography } from '@/theme';
+import { colors, getStatusBg, getStatusText, radii, spacing, typography } from '@/theme';
 import { copyToClipboard, formatRelativeTime } from '@/utils';
 import MemberHistorySheet from './MemberHistorySheet';
 
@@ -29,6 +29,7 @@ export default function GroupMembersTab() {
   const [crewName, setCrewName] = useState('');
   const [crewSaving, setCrewSaving] = useState(false);
   const [crewError, setCrewError] = useState('');
+  const [codeCopied, setCodeCopied] = useState(false);
 
   useEffect(() => { setName(profile?.first_name ?? ''); }, [profile?.first_name]);
   useEffect(() => {
@@ -39,6 +40,12 @@ export default function GroupMembersTab() {
     const timer = setTimeout(() => setCopied(false), 1800);
     return () => clearTimeout(timer);
   }, [copied]);
+
+  useEffect(() => {
+    if (!codeCopied) return;
+    const timer = setTimeout(() => setCodeCopied(false), 2000);
+    return () => clearTimeout(timer);
+  }, [codeCopied]);
 
   const saveName = async () => {
     if (saving || !user) return;
@@ -85,6 +92,22 @@ export default function GroupMembersTab() {
     finally { setCrewSaving(false); }
   };
 
+  const handleCopyInviteCode = () => {
+    if (group?.invite_code) {
+      copyToClipboard(group.invite_code);
+      setCodeCopied(true);
+    }
+  };
+
+  const handleShareInviteCode = async () => {
+    if (!group) return;
+    try {
+      await Share.share({
+        message: `Join "${group.name}" on Ruckus! Code: ${group.invite_code}`,
+      });
+    } catch (_) {}
+  };
+
   return (
     <>
       <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" refreshControl={
@@ -99,6 +122,23 @@ export default function GroupMembersTab() {
             <Text style={styles.inviteIcon}>{copied ? '✓' : '🔗'}</Text>
           </TouchableOpacity>
         </View>
+
+        {group && (
+          <View style={styles.inviteCodeCard}>
+            <View style={styles.inviteCodeLeft}>
+              <Text style={styles.inviteCodeLabel}>INVITE CODE</Text>
+              <Text style={styles.inviteCode}>{group.invite_code}</Text>
+            </View>
+            <View style={styles.inviteCodeActions}>
+              <TouchableOpacity onPress={handleCopyInviteCode} accessibilityRole="button" accessibilityLabel="Copy invite code">
+                <Text style={styles.inviteActionText}>{codeCopied ? 'Copied!' : 'Copy'}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => void handleShareInviteCode()} accessibilityRole="button" accessibilityLabel="Share invite code">
+                <Text style={styles.inviteActionText}>Share</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
 
         <View>
           {members.map((member) => (
@@ -162,6 +202,12 @@ const styles = StyleSheet.create({
   subtitle: { ...typography.caption, fontSize: 14, color: colors.textMuted, marginTop: 6 },
   invite: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceHover, borderWidth: 1, borderColor: colors.borderDefault, borderRadius: 8 },
   inviteIcon: { fontSize: 23, color: colors.textPrimary },
+  inviteCodeCard: { backgroundColor: colors.surface, borderRadius: radii.md, padding: spacing.cardPadding, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderColor: colors.borderDefault },
+  inviteCodeLeft: { flex: 1 },
+  inviteCodeLabel: { ...typography.label, color: colors.textMuted, marginBottom: spacing.xs },
+  inviteCode: { fontSize: 18, fontWeight: '600', color: colors.textPrimary, letterSpacing: 2, fontFamily: typography.monoFamily },
+  inviteCodeActions: { flexDirection: 'row', gap: spacing.md },
+  inviteActionText: { ...typography.caption, color: colors.accentActive, fontWeight: '600' },
   member: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 68, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.borderSubtle },
   avatar: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   initial: { ...typography.body, fontWeight: '600' },
