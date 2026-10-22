@@ -8,7 +8,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useGroupsStore } from '@/store/groupsStore';
 import { useStatusStore } from '@/store/statusStore';
 import { colors, getStatusBg, getStatusText, radii, spacing, typography } from '@/theme';
-import { copyToClipboard, formatRelativeTime } from '@/utils';
+import { buildInviteMessage, copyToClipboard, formatRelativeTime } from '@/utils';
 import MemberHistorySheet from './MemberHistorySheet';
 
 export default function GroupMembersTab() {
@@ -103,7 +103,7 @@ export default function GroupMembersTab() {
     if (!group) return;
     try {
       await Share.share({
-        message: `Join "${group.name}" on Ruckus! Code: ${group.invite_code}`,
+        message: buildInviteMessage(group.name, group.invite_code, group.invite_link?.url),
       });
     } catch (_) {}
   };
